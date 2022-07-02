@@ -1,0 +1,37 @@
+{
+  "name": "derhansen/form_crshield",
+  "type": "typo3-cms-extension",
+  "description": "Challenge/response spam protection for TYPO3 ext:form",
+  "homepage": "https://github.com/derhansen/form_crshield",
+  "support": {
+    "issues": "https://github.com/derhansen/form_crshield/issues"
+  },
+  "authors": [
+    {
+      "name": "Torben Hansen",
+      "email": "derhansen@gmail.com",
+      "homepage": "https://www.derhansen.com",
+      "role": "Developer"
+    }
+  ],
+  "keywords": ["TYPO3 CMS", "form", "spam protection", "challenge response", "extbase"],
+  "license": [
+    "GPL-2.0-or-later"
+  ],
+  "require": {
+    "typo3/cms-core": "^11.5"
+  },
+  "replace": {
+    "typo3-ter/form-crshield": "self.version"
+  },
+  "autoload": {
+    "psr-4": {
+      "Derhansen\\FormCrshield\\": "Classes"
+    }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "form_crshield"
+    }
+  }
+}
