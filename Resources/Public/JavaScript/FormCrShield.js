@@ -11,12 +11,16 @@ document.addEventListener('DOMContentLoaded', function () {
   elementsArray.forEach(element => {
     let challengeString = atob(element.getAttribute('data-cr-challenge'));
     let [exp,challenge] = challengeString.split('|');
+    let delay = element.dataset.crDelay;
 
     // ROT13 the challenge - source: https://stackoverflow.com/a/617685/1744743
     let response = challenge.replace(/[a-zA-Z]/g, function (c) {
       return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
     });
 
-    element.value = btoa(exp + '|' + response);
+    // Set calculated response after defined amount of seconds
+    setTimeout(() => {
+      element.value = btoa(exp + '|' + response)
+    }, delay * 1000)
   });
 });

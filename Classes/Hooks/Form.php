@@ -6,6 +6,7 @@ namespace Derhansen\FormCrshield\Hooks;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
@@ -28,6 +29,10 @@ class Form
     {
         $pageObject = $currentPage ?? $page;
 
+        // Set delay for initial form (no delay for re-submission of form)
+        $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
+        $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 0) : 0;
+
         if ($pageObject) {
             $pageMaxLifetime = $this->getPageMaxLifetime($runtime->getRequest());
             $expirationTime = time() + $pageMaxLifetime;
@@ -35,7 +40,13 @@ class Form
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
-            $newElement->setProperty('fluidAdditionalAttributes', ['data-cr-challenge' => base64_encode($challenge)]);
+            $newElement->setProperty(
+                'fluidAdditionalAttributes',
+                [
+                    'data-cr-challenge' => base64_encode($challenge),
+                    'data-cr-delay' => $delay,
+                ]
+            );
         }
 
         return $currentPage;

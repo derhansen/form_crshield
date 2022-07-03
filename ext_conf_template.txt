@@ -1,0 +1,4 @@
+# settings
+###########################
+# cat=settings/enable/10; type=integer; label=Delay in seconds when response calculation is set using JavaScript
+	crJavaScriptDelay = 3
