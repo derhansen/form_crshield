@@ -40,6 +40,7 @@ class Form
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
+            $newElement->setDefaultValue(base64_encode(random_bytes(20)));
             $newElement->setProperty(
                 'fluidAdditionalAttributes',
                 [
