@@ -54,6 +54,11 @@ class Form
 
     public function afterSubmit(FormRuntime $runtime, $element, $value, $requestArguments)
     {
+        // Write all POST data for the current page to debug log
+        if (is_a($element, Page::class)) {
+            $this->logger->debug('Submitted data', $requestArguments);
+        }
+
         if (!is_a($element, GenericFormElement::class) || $element->getIdentifier() !== self::FIELD_ID) {
             return $value;
         }
