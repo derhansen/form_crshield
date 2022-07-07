@@ -19,6 +19,13 @@ failed and no email will be sent.
 In order to make automatic form submissions harder for spambots with active JavaScript, a configurable
 delay for the JavaScript response calculation can be defined in the extension settings (default value: 3 seconds).
 
+## Can the protection be bypassed?
+
+Yes, the challenge/response spam shield can be bypassed, if the algorithm used by the extension is implemented 
+to a spambot. This is however unlikely, since the spambot either has to use JavaScript (which I believe most 
+spambots do not) or has to extract the challenge from the parsed HTML and must calculate and submit the response
+correctly.
+
 ## Requirements
 
 The extension uses JavaScript to calculate the expected response, so if JavaScript is disabled on client
