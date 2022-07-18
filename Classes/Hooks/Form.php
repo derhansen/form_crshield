@@ -36,7 +36,7 @@ class Form
         if ($pageObject) {
             $pageMaxLifetime = $this->getPageMaxLifetime($runtime->getRequest());
             $expirationTime = time() + $pageMaxLifetime;
-            $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $runtime->getIdentifier());
+            $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
@@ -71,7 +71,7 @@ class Form
         }
 
         [$expirationTime, $clientData] = explode('|', $submittedResponse);
-        $knownHmac = GeneralUtility::hmac($expirationTime, $runtime->getIdentifier());
+        $knownHmac = GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
         $calculatedData = str_rot13($knownHmac);
 
         if ($calculatedData !== $clientData) {
@@ -91,5 +91,16 @@ class Form
     {
         $tsfe = $request->getAttribute('frontend.controller');
         return $tsfe ? $tsfe->get_cache_timeout() : 86400;
+    }
+
+    protected function getHmacSalt(FormRuntime $runtime): string
+    {
+        return $runtime->getIdentifier() . $this->getPageData($runtime->getRequest());
+    }
+
+    protected function getPageData(ServerRequestInterface $request): string
+    {
+        $tsfe = $request->getAttribute('frontend.controller');
+        return $tsfe ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
     }
 }
