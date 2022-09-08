@@ -7,12 +7,14 @@ namespace Derhansen\FormCrshield\Hooks;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Runtime\FormRuntime;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
 class Form
 {
@@ -34,7 +36,7 @@ class Form
         $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 0) : 0;
 
         if ($pageObject) {
-            $pageMaxLifetime = $this->getPageMaxLifetime($runtime->getRequest());
+            $pageMaxLifetime = $this->getPageMaxLifetime($this->getTsfe($this->getRequest($runtime)));
             $expirationTime = time() + $pageMaxLifetime;
             $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
 
@@ -87,20 +89,28 @@ class Form
         return $value;
     }
 
-    protected function getPageMaxLifetime(ServerRequestInterface $request): int
+    protected function getPageMaxLifetime(?TypoScriptFrontendController $tsfe): int
     {
-        $tsfe = $request->getAttribute('frontend.controller');
-        return $tsfe ? $tsfe->get_cache_timeout() : 86400;
+        return $tsfe !== null ? $tsfe->get_cache_timeout() : 86400;
     }
 
     protected function getHmacSalt(FormRuntime $runtime): string
     {
-        return $runtime->getIdentifier() . $this->getPageData($runtime->getRequest());
+        return $runtime->getIdentifier() . $this->getPageData($this->getTsfe($this->getRequest($runtime)));
     }
 
-    protected function getPageData(ServerRequestInterface $request): string
+    protected function getPageData(?TypoScriptFrontendController $tsfe): string
     {
-        $tsfe = $request->getAttribute('frontend.controller');
-        return $tsfe ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
+        return $tsfe !== null ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
+    }
+
+    protected function getRequest(FormRuntime $formRuntime): ServerRequestInterface
+    {
+        return (new Typo3Version())->getMajorVersion() >= 11 ? $formRuntime->getRequest() : $GLOBALS['TYPO3_REQUEST'];
+    }
+
+    protected function getTsfe(ServerRequestInterface $request): ?TypoScriptFrontendController
+    {
+        return $request->getAttribute('frontend.controller');
     }
 }
