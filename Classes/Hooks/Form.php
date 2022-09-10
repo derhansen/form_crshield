@@ -91,7 +91,7 @@ class Form
 
     protected function getPageMaxLifetime(?TypoScriptFrontendController $tsfe): int
     {
-        return $tsfe !== null ? $tsfe->get_cache_timeout() : 86400;
+        return $tsfe ? $tsfe->get_cache_timeout() : 86400;
     }
 
     protected function getHmacSalt(FormRuntime $runtime): string
@@ -101,7 +101,7 @@ class Form
 
     protected function getPageData(?TypoScriptFrontendController $tsfe): string
     {
-        return $tsfe !== null ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
+        return $tsfe ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
     }
 
     protected function getRequest(FormRuntime $formRuntime): ServerRequestInterface
