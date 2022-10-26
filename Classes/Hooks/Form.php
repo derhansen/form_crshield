@@ -7,6 +7,7 @@ namespace Derhansen\FormCrshield\Hooks;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -29,6 +30,13 @@ class Form
 
     public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args)
     {
+        // If the form is in preview mode or we are in backend context, do not add the cr-field
+        if (($runtime->getFormDefinition()->getRenderingOptions()['previewMode'] ?? false) ||
+            ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend()
+        ) {
+            return $currentPage;
+        }
+
         $pageObject = $currentPage ?? $page;
 
         // Set delay for initial form (no delay for re-submission of form)
