@@ -1,0 +1,25 @@
+suites:
+  acceptance:
+    actor: AcceptanceTester
+    path: .
+    modules:
+      enabled:
+        - WebDriver
+        - Db
+        - \Helper\Acceptance
+      config:
+        WebDriver:
+          url: http://dummy.local/
+          browser: chrome
+paths:
+  tests: ../../Tests/Acceptance/WithChromeBrowser/
+  output: ../../Tests/Acceptance/WithChromeBrowser/_output
+  data: ../../Tests/Acceptance/WithChromeBrowser/_data
+  support: ../../Tests/Acceptance/WithChromeBrowser/_support
+  envs: ../../Tests/Acceptance/WithChromeBrowser/_envs
+extensions:
+  enabled:
+    - Codeception\Extension\RunFailed
+params:
+  - env
+

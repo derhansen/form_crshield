@@ -1,0 +1,24 @@
+suites:
+  acceptance:
+    actor: AcceptanceTester
+    path: .
+    modules:
+      enabled:
+        - PhpBrowser
+        - Db
+        - \Helper\Acceptance
+      config:
+        PhpBrowser:
+          url: http://dummy.local/
+paths:
+  tests: ../../Tests/Acceptance/WithPhpBrowser/
+  output: ../../Tests/Acceptance/WithPhpBrowser/_output
+  data: ../../Tests/Acceptance/WithPhpBrowser/_data
+  support: ../../Tests/Acceptance/WithPhpBrowser/_support
+  envs: ../../Tests/Acceptance/WithPhpBrowser/_envs
+extensions:
+  enabled:
+    - Codeception\Extension\RunFailed
+params:
+  - env
+

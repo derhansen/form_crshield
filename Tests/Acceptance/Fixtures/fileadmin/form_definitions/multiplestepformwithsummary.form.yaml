@@ -1,0 +1,53 @@
+
+renderingOptions:
+  submitButtonLabel: Submit
+type: Form
+identifier: multiplestepformwithsummary
+label: 'Multiple step form with summary'
+prototypeName: standard
+finishers:
+  -
+    options:
+      message: SUCCESS
+      contentElementUid: ''
+    identifier: Confirmation
+renderables:
+  -
+    renderingOptions:
+      previousButtonLabel: 'Previous step'
+      nextButtonLabel: 'Next step'
+    type: Page
+    identifier: page-1
+    label: Step
+    renderables:
+      -
+        defaultValue: ''
+        type: Text
+        identifier: text-1
+        label: Text
+        properties:
+          fluidAdditionalAttributes:
+            required: required
+        validators:
+          -
+            identifier: NotEmpty
+  -
+    renderingOptions:
+      previousButtonLabel: 'Previous step'
+      nextButtonLabel: 'Next step'
+    type: Page
+    identifier: page-2
+    label: Step
+    renderables:
+      -
+        defaultValue: ''
+        type: Text
+        identifier: text-2
+        label: Text
+  -
+    renderingOptions:
+      previousButtonLabel: 'Previous step'
+      nextButtonLabel: 'Next step'
+    type: SummaryPage
+    identifier: summarypage-1
+    label: 'Summary step'

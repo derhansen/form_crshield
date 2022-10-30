@@ -1,41 +1,79 @@
 {
-  "name": "derhansen/form_crshield",
-  "type": "typo3-cms-extension",
-  "description": "Challenge/response spam protection for TYPO3 ext:form",
-  "homepage": "https://github.com/derhansen/form_crshield",
-  "support": {
-    "issues": "https://github.com/derhansen/form_crshield/issues"
-  },
-  "authors": [
-    {
-      "name": "Torben Hansen",
-      "email": "derhansen@gmail.com",
-      "homepage": "https://www.derhansen.com",
-      "role": "Developer"
+    "name": "derhansen/form_crshield",
+    "type": "typo3-cms-extension",
+    "description": "Challenge/response spam protection for TYPO3 ext:form",
+    "homepage": "https://github.com/derhansen/form_crshield",
+    "support": {
+        "issues": "https://github.com/derhansen/form_crshield/issues"
+    },
+    "authors": [
+        {
+            "name": "Torben Hansen",
+            "email": "derhansen@gmail.com",
+            "homepage": "https://www.derhansen.com",
+            "role": "Developer"
+        }
+    ],
+    "keywords": [
+        "TYPO3 CMS",
+        "form",
+        "spam protection",
+        "challenge response",
+        "extbase"
+    ],
+    "license": [
+        "GPL-2.0-or-later"
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "typo3/cms-core": "^10.4.29 || ^11.5",
+        "typo3/cms-extbase": "^10.4.29 || ^11.5",
+        "typo3/cms-form": "^10.4.29 || ^11.5",
+        "typo3/cms-frontend": "^10.4.29 || ^11.5"
+    },
+    "require-dev": {
+        "typo3/cms-backend": "^11.5",
+        "typo3/cms-frontend": "^11.5",
+        "typo3/cms-recordlist": "^11.5",
+        "typo3/cms-extbase": "^11.5",
+        "typo3/cms-fluid-styled-content": "^11.5",
+        "typo3/cms-form": "^11.5",
+        "typo3/cms-tstemplate": "^11.5",
+        "typo3/cms-install": "^11.5",
+        "typo3/cms-extensionmanager": "^11.5",
+        "codeception/codeception": "^5.0",
+        "codeception/module-webdriver": "^3.2.0",
+        "codeception/module-db": "^3.0.1",
+        "codeception/module-phpbrowser": "^3.0.0",
+        "codeception/module-asserts": "^3.0.0"
+    },
+    "replace": {
+        "typo3-ter/form-crshield": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Derhansen\\FormCrshield\\": "Classes"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "form_crshield",
+            "app-dir": ".Build",
+            "web-dir": ".Build/public"
+        }
+    },
+    "config": {
+        "vendor-dir": ".Build/vendor",
+        "bin-dir": ".Build/bin",
+        "allow-plugins": {
+            "typo3/class-alias-loader": true,
+            "typo3/cms-composer-installers": true
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "mkdir -p .Build/public/typo3conf/ext/",
+            "[ -L .Build/public/typo3conf/ext/form_crshield ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/form_crshield"
+        ]
     }
-  ],
-  "keywords": ["TYPO3 CMS", "form", "spam protection", "challenge response", "extbase"],
-  "license": [
-    "GPL-2.0-or-later"
-  ],
-  "require": {
-    "php": "^7.4 || ^8.0",
-    "typo3/cms-core": "^10.4.29 || ^11.5",
-    "typo3/cms-extbase": "^10.4.29 || ^11.5",
-    "typo3/cms-form": "^10.4.29 || ^11.5",
-    "typo3/cms-frontend": "^10.4.29 || ^11.5"
-  },
-  "replace": {
-    "typo3-ter/form-crshield": "self.version"
-  },
-  "autoload": {
-    "psr-4": {
-      "Derhansen\\FormCrshield\\": "Classes"
-    }
-  },
-  "extra": {
-    "typo3/cms": {
-      "extension-key": "form_crshield"
-    }
-  }
 }
