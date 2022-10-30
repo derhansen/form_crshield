@@ -64,8 +64,11 @@ jobs:
           java -Djava.awt.headless=true -jar $SELENIUM_JAR_PATH standalone &
           sleep 5;
 
-      - name: Codeception Acceptance Tests
+      - name: Codeception Acceptance Tests with chrome (JavaScript enabled)
         run: .Build/bin/codecept run acceptance --fail-fast --env=github-actions -c Tests/Build/AcceptanceTestsChrome.yml --html
+
+      - name: Codeception Acceptance Tests with phpbrowser (no JavaScript)
+        run: .Build/bin/codecept run acceptance --fail-fast --env=github-actions -c Tests/Build/AcceptanceTestsPhpBrowser.yml --html
 
       - name: Upload Codeception output
         if: ${{ always() }}
