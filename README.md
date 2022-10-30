@@ -1,3 +1,5 @@
+[![Acceptance Tests](https://github.com/derhansen/form_crshield/actions/workflows/AcceptanceTests.yml/badge.svg)](https://github.com/derhansen/form_crshield/actions/workflows/AcceptanceTests.yml)
+
 Form challenge/response spam shield
 ===================================
 
