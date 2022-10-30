@@ -50,6 +50,7 @@ jobs:
         run: |
           export APP_IP=`ip addr show eth0 | grep -Po 'inet \K[\d.]+'`
           sed -i -e "s/LOCAL_DOMAIN/$APP_IP:8888/" Tests/Acceptance/WithChromeBrowser/_envs/github-actions.yml
+          sed -i -e "s/LOCAL_DOMAIN/$APP_IP:8888/" Tests/Acceptance/WithPhpBrowser/_envs/github-actions.yml
           php -S 0.0.0.0:8888 -t .Build/public/ &> php.log.txt &
           sleep 2;
 
