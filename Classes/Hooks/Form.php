@@ -7,11 +7,11 @@ namespace Derhansen\FormCrshield\Hooks;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
+use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Runtime\FormRuntime;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
@@ -29,20 +29,13 @@ class Form
 
     public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args)
     {
-        // If the form is in preview mode or we are in backend context, do not add the cr-field
-        if (($runtime->getFormDefinition()->getRenderingOptions()['previewMode'] ?? false) ||
-            ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend()
-        ) {
-            return $currentPage;
-        }
-
         $pageObject = $currentPage ?? $page;
 
         // Set delay for initial form (no delay for re-submission of form)
         $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
         $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 0) : 0;
 
-        if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
+        if ($pageObject) {
             $pageMaxLifetime = $this->getPageMaxLifetime($this->getTsfe($this->getRequest($runtime)));
             $expirationTime = time() + $pageMaxLifetime;
             $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
@@ -69,7 +62,7 @@ class Form
             $this->logger->debug('Submitted data', $requestArguments);
         }
 
-        if (!(is_a($element, Page::class) || $element->getIdentifier() === self::FIELD_ID)) {
+        if (!is_a($element, GenericFormElement::class) || $element->getIdentifier() !== self::FIELD_ID) {
             return $value;
         }
 
@@ -93,18 +86,7 @@ class Form
             return '';
         }
 
-        // Save sha1 of HmacSalt to formstate for cr-field
-        if ($runtime->getFormState()) {
-            $runtime->getFormState()->setFormValue(self::FIELD_ID, sha1($this->getHmacSalt($runtime)));
-        }
-
         return $value;
-    }
-
-    protected function crFieldHasBeenVerified(FormRuntime $runtime): bool
-    {
-        return $runtime->getFormState() &&
-            $runtime->getFormState()->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
     }
 
     protected function getPageMaxLifetime(?TypoScriptFrontendController $tsfe): int
