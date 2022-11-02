@@ -33,11 +33,8 @@
     },
     "require-dev": {
         "typo3/cms-backend": "^11.5",
-        "typo3/cms-frontend": "^11.5",
         "typo3/cms-recordlist": "^11.5",
-        "typo3/cms-extbase": "^11.5",
         "typo3/cms-fluid-styled-content": "^11.5",
-        "typo3/cms-form": "^11.5",
         "typo3/cms-tstemplate": "^11.5",
         "typo3/cms-install": "^11.5",
         "typo3/cms-extensionmanager": "^11.5",
