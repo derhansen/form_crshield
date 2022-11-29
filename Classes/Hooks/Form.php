@@ -20,7 +20,10 @@ class Form
 {
     const FIELD_ID = 'cr-field';
 
-    private LoggerInterface $logger;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     public function __construct()
     {
