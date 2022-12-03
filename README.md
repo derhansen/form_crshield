@@ -7,7 +7,7 @@ Form challenge/response spam shield
 
 ## What is it?
 
-Form challenge/response spam shield is a TYPO3 extension to prevent automated form submissions
+Form challenge/response spambot shield is a TYPO3 extension to prevent automated form submissions
 in TYPO3 form extension. 
 
 ## How does it work?

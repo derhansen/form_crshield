@@ -1,8 +1,8 @@
 <?php
 
 $EM_CONF[$_EXTKEY] = [
-    'title' => 'Form challenge/response spam shield',
-    'description' => 'Challenge/response spam protection for ext:form',
+    'title' => 'Form challenge/response spambot shield',
+    'description' => 'Challenge/response spambot protection for ext:form',
     'category' => 'fe',
     'author' => 'Torben Hansen',
     'author_email' => 'derhansen@gmail.com',

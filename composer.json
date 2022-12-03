@@ -1,7 +1,7 @@
 {
     "name": "derhansen/form_crshield",
     "type": "typo3-cms-extension",
-    "description": "Challenge/response spam protection for TYPO3 ext:form",
+    "description": "Challenge/response spambot protection for TYPO3 ext:form",
     "homepage": "https://github.com/derhansen/form_crshield",
     "support": {
         "issues": "https://github.com/derhansen/form_crshield/issues"
