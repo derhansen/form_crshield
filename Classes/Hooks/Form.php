@@ -48,18 +48,11 @@ class Form
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
             $pageMaxLifetime = $this->getPageMaxLifetime($this->getTsfe($this->getRequest($runtime)));
             $expirationTime = time() + $pageMaxLifetime;
-            $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
+            $challenge = $delay . '|' . $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
-            $newElement->setDefaultValue(base64_encode(random_bytes(20)));
-            $newElement->setProperty(
-                'fluidAdditionalAttributes',
-                [
-                    'data-cr-challenge' => base64_encode($challenge),
-                    'data-cr-delay' => $delay,
-                ]
-            );
+            $newElement->setDefaultValue(base64_encode($challenge));
         }
 
         return $currentPage;
