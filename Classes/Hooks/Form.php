@@ -47,7 +47,7 @@ class Form
 
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
             $pageMaxLifetime = $this->getPageMaxLifetime($this->getTsfe($this->getRequest($runtime)));
-            $expirationTime = time() + $pageMaxLifetime;
+            $expirationTime = (string)(time() + $pageMaxLifetime);
             $challenge = $delay . '|' . $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');

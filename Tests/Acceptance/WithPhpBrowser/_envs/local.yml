@@ -1,8 +1,8 @@
 modules:
   config:
       PhpBrowser:
-        url: http://form-crshield-acceptance-v11.typo3.local/
+        url: http://form-crshield-acceptance-v12.typo3.local/
       Db:
-        dsn: 'mysql:host=localhost;dbname=typo3_formcrshield_acceptance_v11'
+        dsn: 'mysql:host=localhost;dbname=typo3_formcrshield_acceptance_v12'
         user: '%DB_USERNAME%'
         password: '%DB_PASSWORD%'

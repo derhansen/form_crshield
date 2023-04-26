@@ -26,23 +26,24 @@
     ],
     "require": {
         "php": "^7.2 || ^8.0",
-        "typo3/cms-core": "^10.4.29 || ^11.5",
-        "typo3/cms-extbase": "^10.4.29 || ^11.5",
-        "typo3/cms-form": "^10.4.29 || ^11.5",
-        "typo3/cms-frontend": "^10.4.29 || ^11.5"
+        "typo3/cms-core": "^10.4.29 || ^11.5 || ^12.4",
+        "typo3/cms-extbase": "^10.4.29 || ^11.5 || ^12.4",
+        "typo3/cms-form": "^10.4.29 || ^11.5 || ^12.4",
+        "typo3/cms-frontend": "^10.4.29 || ^11.5 || ^12.4"
     },
     "require-dev": {
-        "typo3/cms-backend": "^11.5",
-        "typo3/cms-recordlist": "^11.5",
-        "typo3/cms-fluid-styled-content": "^11.5",
-        "typo3/cms-tstemplate": "^11.5",
-        "typo3/cms-install": "^11.5",
-        "typo3/cms-extensionmanager": "^11.5",
+        "typo3/cms-backend": " ^12.4",
+        "typo3/cms-recordlist": "^12.4",
+        "typo3/cms-fluid-styled-content": "^12.4",
+        "typo3/cms-tstemplate": "^12.4",
+        "typo3/cms-install": "^12.4",
+        "typo3/cms-extensionmanager": "^12.4",
         "codeception/codeception": "^5.0",
         "codeception/module-webdriver": "^3.2.0",
         "codeception/module-db": "^3.0.1",
         "codeception/module-phpbrowser": "^3.0.0",
-        "codeception/module-asserts": "^3.0.0"
+        "codeception/module-asserts": "^3.0.0",
+        "sbuerk/typo3-cmscomposerinstallers-testingframework-bridge": "^0.1.0"
     },
     "replace": {
         "typo3-ter/form-crshield": "self.version"
@@ -64,7 +65,8 @@
         "bin-dir": ".Build/bin",
         "allow-plugins": {
             "typo3/class-alias-loader": true,
-            "typo3/cms-composer-installers": true
+            "typo3/cms-composer-installers": true,
+            "sbuerk/typo3-cmscomposerinstallers-testingframework-bridge": true
         }
     },
     "scripts": {
