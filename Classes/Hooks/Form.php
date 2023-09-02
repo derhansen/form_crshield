@@ -52,6 +52,7 @@ class Form
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
             $newElement->setDefaultValue(base64_encode($challenge));
+            $newElement->setProperty('fluidAdditionalAttributes', ['autocomplete' => 'off']);
         }
 
         return $currentPage;
