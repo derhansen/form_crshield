@@ -1,9 +1,10 @@
+[![Latest Stable Version](https://poser.pugx.org/derhansen/form_crshield/v/stable)](https://packagist.org/packages/derhansen/form_crshield)
 [![Acceptance Tests](https://github.com/derhansen/form_crshield/actions/workflows/AcceptanceTests.yml/badge.svg)](https://github.com/derhansen/form_crshield/actions/workflows/AcceptanceTests.yml)
+[![Monthly Downloads](https://poser.pugx.org/derhansen/form_crshield/d/monthly)](https://packagist.org/packages/derhansen/form_crshield)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 Form challenge/response spam shield
 ===================================
-
-**Note, that this TYPO3 extension is in beta state. Use at own risk on production websites.**
 
 ## What is it?
 
@@ -58,5 +59,11 @@ $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['Hooks']['Form']
     ]
 ];
 ```
+
+## Versions
+
+| Version | TYPO3       | PHP        | Support/Development                     |
+|---------|-------------|------------|---------------------------------------- |
+| 1.x     | 10.4 - 12.4 | 7.2 - 8.2  | Features, Bugfixes, Security Updates    |
 
  
