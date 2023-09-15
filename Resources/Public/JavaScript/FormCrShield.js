@@ -12,6 +12,6 @@ document.addEventListener('DOMContentLoaded', () =>
       {
         return String.fromCharCode( char.charCodeAt(0) + ( char.toUpperCase() <= 'M' ? 13 : -13 ) )/* https://stackoverflow.com/a/14553231 */
       }))
-    }, 1e3 * (delay ?? 0))
+    }, 1e3 * (delay ?? 3))
   })
 });

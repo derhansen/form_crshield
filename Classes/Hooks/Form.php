@@ -46,7 +46,7 @@ class Form
             $expirationTime = (string)(time() + $pageMaxLifetime);
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
-            $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 0) : 0;
+            $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
             $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime)) . '|' . $delay;
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
