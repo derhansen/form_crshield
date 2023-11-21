@@ -74,10 +74,10 @@ jobs:
           while ! nc -z 127.0.0.1 8888 </dev/null; do echo Waiting for PHP server to start...; sleep 1; done
 
       - name: Codeception Acceptance Tests with phpbrowser (no JavaScript)
-        run: .Build/vendor/bin/codecept run acceptance --env=github-actions -c Tests/Build/AcceptanceTestsPhpBrowser.yml --html
+        run: .Build/vendor/bin/codecept run acceptance --env=github-actions -c .Build/Acceptance/AcceptanceTestsPhpBrowser.yml --html
 
       - name: Codeception Acceptance Tests with chrome (JavaScript enabled)
-        run: .Build/vendor/bin/codecept run acceptance --env=github-actions -c Tests/Build/AcceptanceTestsChrome.yml --html
+        run: .Build/vendor/bin/codecept run acceptance --env=github-actions -c .Build/Acceptance/AcceptanceTestsChrome.yml --html
 
       - name: Upload Codeception output
         if: ${{ always() }}
