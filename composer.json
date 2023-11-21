@@ -31,19 +31,6 @@
         "typo3/cms-form": "^10.4.29 || ^11.5 || ^12.4",
         "typo3/cms-frontend": "^10.4.29 || ^11.5 || ^12.4"
     },
-    "require-dev": {
-        "typo3/cms-backend": " ^12.4",
-        "typo3/cms-recordlist": "^12.4",
-        "typo3/cms-fluid-styled-content": "^12.4",
-        "typo3/cms-tstemplate": "^12.4",
-        "typo3/cms-install": "^12.4",
-        "typo3/cms-extensionmanager": "^12.4",
-        "codeception/codeception": "^5.0",
-        "codeception/module-webdriver": "^3.2.0",
-        "codeception/module-db": "^3.0.1",
-        "codeception/module-phpbrowser": "^3.0.0",
-        "codeception/module-asserts": "^3.0.0"
-    },
     "replace": {
         "typo3-ter/form-crshield": "self.version"
     },
@@ -54,23 +41,7 @@
     },
     "extra": {
         "typo3/cms": {
-            "extension-key": "form_crshield",
-            "app-dir": ".Build",
-            "web-dir": ".Build/public"
+            "extension-key": "form_crshield"
         }
-    },
-    "config": {
-        "vendor-dir": ".Build/vendor",
-        "bin-dir": ".Build/bin",
-        "allow-plugins": {
-            "typo3/class-alias-loader": true,
-            "typo3/cms-composer-installers": true
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "mkdir -p .Build/public/typo3conf/ext/",
-            "[ -L .Build/public/typo3conf/ext/form_crshield ] || ln -snvf ../../../../. .Build/public/typo3conf/ext/form_crshield"
-        ]
     }
 }

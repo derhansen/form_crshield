@@ -1,5 +1,7 @@
 .idea
-.Build
 composer.lock
 config
 var
+.Build/public
+.Build/vendor
+.Build/composer.lock
