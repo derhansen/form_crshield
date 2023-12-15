@@ -66,4 +66,7 @@ $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['Hooks']['Form']
 |---------|-------------|------------|---------------------------------------- |
 | 1.x     | 10.4 - 12.4 | 7.2 - 8.2  | Features, Bugfixes, Security Updates    |
 
- 
+
+## Thanks for sponsoring
+
+* Thanks to [3m5. Media GmbH](https://www.3m5.de/) for supporting my open source work on this extension 
