@@ -100,7 +100,7 @@ class Form
     protected function crFieldHasBeenVerified(FormRuntime $runtime): bool
     {
         return $runtime->getFormState() &&
-            $runtime->getFormState()->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
+            hash_equals($runtime->getFormState()->getFormValue(self::FIELD_ID), sha1($this->getHmacSalt($runtime)));
     }
 
     protected function getPageMaxLifetime(?TypoScriptFrontendController $tsfe): int
