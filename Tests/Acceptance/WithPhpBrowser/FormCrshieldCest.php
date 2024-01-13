@@ -57,4 +57,25 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
+    public function serverSideValidationCanBeSubmittedWithValidValues(AcceptanceTester $I)
+    {
+        $I->amOnPage('server-side-validation');
+        $I->see('Step');
+        $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
+        $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
+        $I->click('Submit');
+        $I->dontSee('SUCCESS');
+    }
+
+    public function serverSideValidationSubmitWithEmptyValuesThenResubmit(AcceptanceTester $I)
+    {
+        $I->amOnPage('server-side-validation');
+        $I->see('Step');
+        $I->click('Submit');
+        $I->see('This field is mandatory. ');
+        $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
+        $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
+        $I->click('Submit');
+        $I->dontSee('SUCCESS');
+    }
 }

@@ -6,5 +6,5 @@
 
 2. Execute Acceptance Testsuite
 
-   * `.Build/bin/codecept run acceptance --env local -c Tests/Build/AcceptanceTestsChrome.yml`
-   * `.Build/bin/codecept run acceptance --env local -c Tests/Build/AcceptanceTestsPhpBrowser.yml`
+   * `.Build/vendor/bin/codecept run acceptance --env local -c .Build/Acceptance/AcceptanceTestsChrome.yml`
+   * `.Build/vendor/bin/codecept run acceptance --env local -c .Build/Acceptance/AcceptanceTestsPhpBrowser.yml`
