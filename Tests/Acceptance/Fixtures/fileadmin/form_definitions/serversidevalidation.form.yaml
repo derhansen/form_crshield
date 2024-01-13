@@ -1,0 +1,47 @@
+
+renderingOptions:
+  submitButtonLabel: Submit
+type: Form
+identifier: serverSideValidation
+label: 'Server Side Validation'
+prototypeName: standard
+finishers:
+  -
+    options:
+      message: SUCCESS
+      contentElementUid: ''
+    identifier: Confirmation
+renderables:
+  -
+    renderingOptions:
+      previousButtonLabel: 'Previous step'
+      nextButtonLabel: 'Next step'
+    type: Page
+    identifier: page-1
+    label: Step
+    renderables:
+      -
+        properties:
+          options:
+            1: '1'
+            2: '2'
+            3: '3'
+            4: '4'
+          validationErrorMessages:
+            -
+              code: 1475002976
+              message: 'Min 2 and max 3'
+            -
+              code: 1475002994
+              message: 'Min 2 and max 3'
+        type: MultiCheckbox
+        identifier: multicheckbox-1
+        label: 'Multi checkbox'
+        validators:
+          -
+            options:
+              minimum: '2'
+              maximum: '3'
+            identifier: Count
+          -
+            identifier: NotEmpty
