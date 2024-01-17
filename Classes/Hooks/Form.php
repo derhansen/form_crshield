@@ -42,8 +42,7 @@ class Form
         $pageObject = $currentPage ?? $page;
 
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
-            $pageMaxLifetime = $this->getPageMaxLifetime($this->getTsfe($this->getRequest($runtime)));
-            $expirationTime = (string)(time() + $pageMaxLifetime);
+            $expirationTime = $this->getPageExpirationTime($runtime);
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
             $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
@@ -103,9 +102,24 @@ class Form
             $runtime->getFormState()->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
     }
 
-    protected function getPageMaxLifetime(?TypoScriptFrontendController $tsfe): int
+    protected function getPageExpirationTime(FormRuntime $runtime): int
     {
-        return $tsfe ? $tsfe->get_cache_timeout() : 86400;
+        $tsfe = $this->getTsfe($this->getRequest($runtime));
+        // TSFE to not contains a valid page record?!
+        if (!$tsfe || !\is_array($tsfe->page)) {
+            return 0;
+        }
+        $timeOutTime = $tsfe->get_cache_timeout();
+
+        // If page has a endtime before the current timeOutTime, use it instead:
+        if ($tsfe->page['endtime']) {
+          $endtimePage = (int) $tsfe->page['endtime'] - $GLOBALS['EXEC_TIME'];
+          if($endtimePage && $endtimePage < $timeOutTime) {
+            $timeOutTime = $endtimePage;
+          }
+        }
+
+        return (int) $timeOutTime + $GLOBALS['EXEC_TIME'];
     }
 
     protected function getHmacSalt(FormRuntime $runtime): string
