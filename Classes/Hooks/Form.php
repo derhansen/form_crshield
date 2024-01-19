@@ -83,7 +83,7 @@ class Form
             return '';
         }
 
-        if ((int)($expirationTime + intval($extensionSettings['crAdditionalExpiration'] ?? 3600)) <= time()) {
+        if ((int)($expirationTime) <= time()) {
             $this->logger->debug('CR response expired. Submitted data', $requestArguments);
             return '';
         }
@@ -117,6 +117,11 @@ class Form
             if ($endtimePage && $endtimePage < $timeOutTime) {
                 $timeOutTime = $endtimePage;
             }
+        }
+
+        $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
+        if ($timeOutTime < (int)($extensionSettings['minimumPageExpirationTime'] ?? 900)) {
+            $timeOutTime += (int)($extensionSettings['additionalPageExpirationTime'] ?? 3600);
         }
 
         return $timeOutTime + $GLOBALS['EXEC_TIME'];

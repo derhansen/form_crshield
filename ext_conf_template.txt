@@ -2,5 +2,7 @@
 ###########################
 # cat=settings/enable/10; type=integer; label=Delay in seconds when response calculation is set using JavaScript
 	crJavaScriptDelay = 3
-# cat=settings/enable/20; type=integer; label=Additional time in seconds to add on to page lifetime
-	crAdditionalExpiration = 3600
+# cat=settings/enable/20; type=integer; label=Calculated minimum page cache expiration time in seconds
+	minimumPageExpirationTime = 900
+# cat=settings/enable/30; type=integer; label=Additional time in seconds added to page expiration time, if page expiration time is below calculated minimum page cache expiration time
+	additionalPageExpirationTime = 3600

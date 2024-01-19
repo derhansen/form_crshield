@@ -41,10 +41,25 @@ A modern webbrowser is required to run the JavaScript. Internet Explorer < 11 is
 Just install the extension on your TYPO3 website using composer or the TYPO3 extension manager.
 No further configuration is required.
 
-## Settings
+## Extension settings
 
-It is possible to configure the delay in seconds for the JavaScript response calculation. This can be
-done in the extensions settings. The default value is 3 seconds.
+The extension has the following extension settings, which can be adjusted if required. The default 
+values should however be fine for most websites.
+
+### crJavaScriptDelay
+
+Defines the delay in seconds for the JavaScript response calculation. The default value is `3` seconds. 
+
+### minimumPageExpirationTime
+
+If the calculated page cache lifetime if very low (e.g. 60 seconds), it may not be possible to fill out a 
+form before the expiration time for the CR response is reached. This setting defines the minimum amount of 
+second, the calculated page cache lifetime must have. Default value is `900` seconds.
+
+### additionalPageExpirationTime
+
+Defines the amount of seconds, which is added to the calculated page cache lifetime, if the calculated page cache 
+lifetime is below the defined value in `minimumPageExpirationTime`.
 
 ## Logging
 
