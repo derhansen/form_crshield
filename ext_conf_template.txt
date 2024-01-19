@@ -2,3 +2,5 @@
 ###########################
 # cat=settings/enable/10; type=integer; label=Delay in seconds when response calculation is set using JavaScript
 	crJavaScriptDelay = 3
+# cat=settings/enable/20; type=integer; label=Additional time in seconds to add on to page lifetime
+	crAdditionalExpiration = 3600

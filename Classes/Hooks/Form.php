@@ -83,7 +83,7 @@ class Form
             return '';
         }
 
-        if ((int)$expirationTime <= time()) {
+        if ((int)($expirationTime + intval($extensionSettings['crAdditionalExpiration'] ?? 3600)) <= time()) {
             $this->logger->debug('CR response expired. Submitted data', $requestArguments);
             return '';
         }
