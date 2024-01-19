@@ -45,7 +45,7 @@ class Form
             $expirationTime = (string)$this->getPageExpirationTime($runtime);
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
-            $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
+            $delay = $runtime->getFormSession() === null ? intval($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
             $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime)) . '|' . $delay;
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
@@ -83,7 +83,7 @@ class Form
             return '';
         }
 
-        if ((int)($expirationTime + intval($extensionSettings['crAdditionalExpiration'] ?? 3600)) <= time()) {
+        if ($GLOBALS['EXEC_TIME'] > ((int)$expirationTime + intval($extensionSettings['crAdditionalExpiration'] ?? 3600))) {
             $this->logger->debug('CR response expired. Submitted data', $requestArguments);
             return '';
         }
