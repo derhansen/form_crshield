@@ -42,7 +42,7 @@ class Form
         $pageObject = $currentPage ?? $page;
 
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
-            $expirationTime = $this->getPageExpirationTime($runtime);
+            $expirationTime = (string)$this->getPageExpirationTime($runtime);
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
             $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
