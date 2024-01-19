@@ -7,6 +7,7 @@ namespace Derhansen\FormCrshield\Hooks;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\LogManager;
@@ -25,9 +26,16 @@ class Form
      */
     private $logger;
 
+    /**
+     * @var int
+     */
+    private $currentTimestamp;
+
     public function __construct()
     {
         $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
+        $context = GeneralUtility::makeInstance(Context::class);
+        $this->currentTimestamp = $context->getPropertyFromAspect('date', 'timestamp');
     }
 
     public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args)
@@ -83,7 +91,7 @@ class Form
             return '';
         }
 
-        if ((int)($expirationTime) <= time()) {
+        if ((int)($expirationTime) <= $this->currentTimestamp) {
             $this->logger->debug('CR response expired. Submitted data', $requestArguments);
             return '';
         }
@@ -113,7 +121,7 @@ class Form
 
         // If page has a endtime before the current timeOutTime, use it instead:
         if ($tsfe->page['endtime']) {
-            $endtimePage = (int)($tsfe->page['endtime'] - $GLOBALS['EXEC_TIME']);
+            $endtimePage = (int)($tsfe->page['endtime']) - $this->currentTimestamp;
             if ($endtimePage && $endtimePage < $timeOutTime) {
                 $timeOutTime = $endtimePage;
             }
@@ -124,7 +132,7 @@ class Form
             $timeOutTime += (int)($extensionSettings['additionalPageExpirationTime'] ?? 3600);
         }
 
-        return $timeOutTime + $GLOBALS['EXEC_TIME'];
+        return $timeOutTime + $this->currentTimestamp;
     }
 
     protected function getHmacSalt(FormRuntime $runtime): string
