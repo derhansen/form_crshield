@@ -106,20 +106,20 @@ class Form
     {
         $tsfe = $this->getTsfe($this->getRequest($runtime));
         // TSFE to not contains a valid page record?!
-        if (!$tsfe || !\is_array($tsfe->page)) {
+        if (!$tsfe || !is_array($tsfe->page)) {
             return 0;
         }
         $timeOutTime = $tsfe->get_cache_timeout();
 
         // If page has a endtime before the current timeOutTime, use it instead:
         if ($tsfe->page['endtime']) {
-          $endtimePage = (int) $tsfe->page['endtime'] - $GLOBALS['EXEC_TIME'];
-          if($endtimePage && $endtimePage < $timeOutTime) {
-            $timeOutTime = $endtimePage;
-          }
+            $endtimePage = (int)($tsfe->page['endtime'] - $GLOBALS['EXEC_TIME']);
+            if ($endtimePage && $endtimePage < $timeOutTime) {
+                $timeOutTime = $endtimePage;
+            }
         }
 
-        return (int) $timeOutTime + $GLOBALS['EXEC_TIME'];
+        return $timeOutTime + $GLOBALS['EXEC_TIME'];
     }
 
     protected function getHmacSalt(FormRuntime $runtime): string
