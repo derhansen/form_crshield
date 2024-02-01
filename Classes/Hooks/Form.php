@@ -152,6 +152,6 @@ class Form
 
     protected function getTsfe(ServerRequestInterface $request): ?TypoScriptFrontendController
     {
-        return $request->getAttribute('frontend.controller');
+        return (new Typo3Version())->getMajorVersion() >= 11 ? $request->getAttribute('frontend.controller') : $GLOBALS['TSFE'];
     }
 }
