@@ -77,9 +77,9 @@ $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['Hooks']['Form']
 
 ## Versions
 
-| Version | TYPO3       | PHP        | Support/Development                     |
-|---------|-------------|------------|---------------------------------------- |
-| 1.x     | 10.4 - 12.4 | 7.2 - 8.2  | Features, Bugfixes, Security Updates    |
+| Version | TYPO3       | PHP       | Support/Development                     |
+|---------|-------------|-----------|---------------------------------------- |
+| 1.x     | 10.4 - 12.4 | 7.2 - 8.3 | Features, Bugfixes, Security Updates    |
 
 
 ## Thanks for sponsoring
