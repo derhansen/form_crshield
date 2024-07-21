@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Derhansen\FormCrshield\:
+    resource: '../Classes/*'
+
+  Derhansen\FormCrshield\Hooks\Form:
+    public: true
+

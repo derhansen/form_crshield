@@ -25,11 +25,10 @@
         "GPL-2.0-or-later"
     ],
     "require": {
-        "php": "^7.2 || ^8.0",
-        "typo3/cms-core": "^10.4.29 || ^11.5 || ^12.4",
-        "typo3/cms-extbase": "^10.4.29 || ^11.5 || ^12.4",
-        "typo3/cms-form": "^10.4.29 || ^11.5 || ^12.4",
-        "typo3/cms-frontend": "^10.4.29 || ^11.5 || ^12.4"
+        "typo3/cms-core": "^13.2",
+        "typo3/cms-extbase": "^13.2",
+        "typo3/cms-form": "^13.2",
+        "typo3/cms-frontend": "^13.2"
     },
     "replace": {
         "typo3-ter/form-crshield": "self.version"

@@ -8,37 +8,31 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Http\ApplicationType;
-use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Runtime\FormRuntime;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use TYPO3\CMS\Frontend\Cache\CacheLifetimeCalculator;
+use TYPO3\CMS\Frontend\Page\PageInformation;
 
 class Form
 {
-    const FIELD_ID = 'cr-field';
+    private const FIELD_ID = 'cr-field';
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private int $currentTimestamp;
+    private int $cacheTimeOutDefault = 86400;
 
-    /**
-     * @var int
-     */
-    private $currentTimestamp;
-
-    public function __construct()
-    {
-        $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        $context = GeneralUtility::makeInstance(Context::class);
-        $this->currentTimestamp = $context->getPropertyFromAspect('date', 'timestamp');
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly HashService $hashService,
+        private readonly Context $context
+    ) {
+        $this->currentTimestamp = $this->context->getPropertyFromAspect('date', 'timestamp');
     }
 
-    public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args)
+    public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args): ?Page
     {
         // If the form is in preview mode or we are in backend context, do not add the cr-field
         if (($runtime->getFormDefinition()->getRenderingOptions()['previewMode'] ?? false) ||
@@ -54,7 +48,7 @@ class Form
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
             $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
-            $challenge = $expirationTime . '|' . GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime)) . '|' . $delay;
+            $challenge = $expirationTime . '|' . $this->hashService->hmac($expirationTime, $this->getHmacSalt($runtime)) . '|' . $delay;
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
@@ -83,7 +77,7 @@ class Form
         }
 
         [$expirationTime, $clientData] = explode('|', $submittedResponse);
-        $knownHmac = GeneralUtility::hmac($expirationTime, $this->getHmacSalt($runtime));
+        $knownHmac = $this->hashService->hmac($expirationTime, $this->getHmacSalt($runtime));
         $calculatedData = str_rot13($knownHmac);
 
         if ($calculatedData !== $clientData) {
@@ -112,21 +106,12 @@ class Form
 
     protected function getPageExpirationTime(FormRuntime $runtime): int
     {
-        $tsfe = $this->getTsfe($this->getRequest($runtime));
-        // TSFE to not contains a valid page record?!
-        if (!$tsfe || !is_array($tsfe->page)) {
+        $pageRecord = $this->getPageRecord($runtime->getRequest());
+        if ($pageRecord === []) {
             return 0;
         }
-        $timeOutTime = $tsfe->get_cache_timeout();
 
-        // If page has a endtime before the current timeOutTime, use it instead:
-        if ($tsfe->page['endtime']) {
-            $endtimePage = (int)($tsfe->page['endtime']) - $this->currentTimestamp;
-            if ($endtimePage && $endtimePage < $timeOutTime) {
-                $timeOutTime = $endtimePage;
-            }
-        }
-
+        $timeOutTime = $this->getCacheTimeout($runtime->getRequest());
         $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
         if ($timeOutTime < (int)($extensionSettings['minimumPageExpirationTime'] ?? 900)) {
             $timeOutTime += (int)($extensionSettings['additionalPageExpirationTime'] ?? 3600);
@@ -135,23 +120,34 @@ class Form
         return $timeOutTime + $this->currentTimestamp;
     }
 
+    /**
+     * Get the cache timeout for the current page (taken 1:1 from TypoScriptFrontendController)
+     */
+    protected function getCacheTimeout(ServerRequestInterface $request): int
+    {
+        $pageInformation = $request->getAttribute('frontend.page.information');
+        $typoScriptConfigArray = $request->getAttribute('frontend.typoscript')->getConfigArray();
+        return GeneralUtility::makeInstance(CacheLifetimeCalculator::class)
+            ->calculateLifetimeForPage(
+                $pageInformation->getId(),
+                $pageInformation->getPageRecord(),
+                $typoScriptConfigArray,
+                $this->cacheTimeOutDefault,
+                $this->context
+            );
+    }
+
+
     protected function getHmacSalt(FormRuntime $runtime): string
     {
-        return $runtime->getIdentifier() . $this->getPageData($this->getTsfe($this->getRequest($runtime)));
+        $pageRecord = $this->getPageRecord($runtime->getRequest());
+        return $runtime->getIdentifier() . $pageRecord['crdate'] . '-' . $pageRecord['uid'];
     }
 
-    protected function getPageData(?TypoScriptFrontendController $tsfe): string
+    protected function getPageRecord(ServerRequestInterface $request): array
     {
-        return $tsfe ? $tsfe->page['crdate'] . '-' . $tsfe->page['uid'] : '0-0';
-    }
-
-    protected function getRequest(FormRuntime $formRuntime): ServerRequestInterface
-    {
-        return (new Typo3Version())->getMajorVersion() >= 11 ? $formRuntime->getRequest() : $GLOBALS['TYPO3_REQUEST'];
-    }
-
-    protected function getTsfe(ServerRequestInterface $request): ?TypoScriptFrontendController
-    {
-        return (new Typo3Version())->getMajorVersion() >= 11 ? $request->getAttribute('frontend.controller') : $GLOBALS['TSFE'];
+        /** @var PageInformation $pageInformation */
+        $pageInformation = $request->getAttribute('frontend.page.information');
+        return $pageInformation->getPageRecord();
     }
 }

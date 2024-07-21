@@ -9,7 +9,7 @@ Form challenge/response spam shield
 ## What is it?
 
 Form challenge/response spambot shield is a TYPO3 extension to prevent automated form submissions
-in TYPO3 form extension. 
+in TYPO3 form extension.
 
 ## How does it work?
 
@@ -24,8 +24,8 @@ delay for the JavaScript response calculation can be defined in the extension se
 
 ## Can the protection be bypassed?
 
-Yes, the challenge/response spam shield can be bypassed, if the algorithm used by the extension is implemented 
-to a spambot. This is however unlikely, since the spambot either has to use JavaScript (which I believe most 
+Yes, the challenge/response spam shield can be bypassed, if the algorithm used by the extension is implemented
+to a spambot. This is however unlikely, since the spambot either has to use JavaScript (which I believe most
 spambots do not) or has to extract the challenge from the parsed HTML and must calculate and submit the response
 correctly.
 
@@ -43,22 +43,22 @@ No further configuration is required.
 
 ## Extension settings
 
-The extension has the following extension settings, which can be adjusted if required. The default 
+The extension has the following extension settings, which can be adjusted if required. The default
 values should however be fine for most websites.
 
 ### crJavaScriptDelay
 
-Defines the delay in seconds for the JavaScript response calculation. The default value is `3` seconds. 
+Defines the delay in seconds for the JavaScript response calculation. The default value is `3` seconds.
 
 ### minimumPageExpirationTime
 
-If the calculated page cache lifetime if very low (e.g. 60 seconds), it may not be possible to fill out a 
-form before the expiration time for the CR response is reached. This setting defines the minimum amount of 
+If the calculated page cache lifetime if very low (e.g. 60 seconds), it may not be possible to fill out a
+form before the expiration time for the CR response is reached. This setting defines the minimum amount of
 second, the calculated page cache lifetime must have. Default value is `900` seconds.
 
 ### additionalPageExpirationTime
 
-Defines the amount of seconds, which is added to the calculated page cache lifetime, if the calculated page cache 
+Defines the amount of seconds, which is added to the calculated page cache lifetime, if the calculated page cache
 lifetime is below the defined value in `minimumPageExpirationTime`.
 
 ## Logging
@@ -79,9 +79,10 @@ $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['Hooks']['Form']
 
 | Version | TYPO3       | PHP       | Support/Development                     |
 |---------|-------------|-----------|---------------------------------------- |
+| 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates    |
 | 1.x     | 10.4 - 12.4 | 7.2 - 8.3 | Features, Bugfixes, Security Updates    |
 
 
 ## Thanks for sponsoring
 
-* Thanks to [3m5. Media GmbH](https://www.3m5.de/) for supporting my open source work on this extension 
+* Thanks to [3m5. Media GmbH](https://www.3m5.de/) for supporting my open source work on this extension
