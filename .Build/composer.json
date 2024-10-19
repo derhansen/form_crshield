@@ -9,18 +9,17 @@
     ],
     "require": {
         "derhansen/form_crshield": "@dev",
-        "typo3/cms-core": "^13.2 || dev-main",
-        "typo3/cms-extbase": "^13.2 || dev-main",
-        "typo3/cms-form": "^13.2 || dev-main",
-        "typo3/cms-frontend": "^13.2 || dev-main"
+        "typo3/cms-core": "^13.4",
+        "typo3/cms-extbase": "^13.4",
+        "typo3/cms-form": "^13.4",
+        "typo3/cms-frontend": "^13.4"
     },
     "require-dev": {
-        "typo3/cms-backend": " ^13.2 || dev-main",
-        "typo3/cms-recordlist": "^13.2 || dev-main",
-        "typo3/cms-fluid-styled-content": "^13.2 || dev-main",
-        "typo3/cms-tstemplate": "^13.2 || dev-main",
-        "typo3/cms-install": "^13.2 || dev-main",
-        "typo3/cms-extensionmanager": "^13.2 || dev-main",
+        "typo3/cms-backend": " ^13.4",
+        "typo3/cms-fluid-styled-content": "^13.4",
+        "typo3/cms-tstemplate": "^13.4",
+        "typo3/cms-install": "^13.4",
+        "typo3/cms-extensionmanager": "^13.4",
         "codeception/codeception": "^5.0",
         "codeception/module-webdriver": "^3.2.0",
         "codeception/module-db": "^3.0.1",
