@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Derhansen\FormCrshield\Hooks;
 
+use Derhansen\FormCrshield\Service\ChallengeResponseService;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Http\ApplicationType;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
@@ -26,8 +26,8 @@ class Form
 
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly HashService $hashService,
-        private readonly Context $context
+        private readonly Context $context,
+        private readonly ChallengeResponseService $challengeResponseService
     ) {
         $this->currentTimestamp = $this->context->getPropertyFromAspect('date', 'timestamp');
     }
@@ -44,11 +44,14 @@ class Form
         $pageObject = $currentPage ?? $page;
 
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
-            $expirationTime = (string)$this->getPageExpirationTime($runtime);
             // Set delay for initial form (no delay for re-submission of form)
             $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
             $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
-            $challenge = $expirationTime . '|' . $this->hashService->hmac($expirationTime, $this->getHmacSalt($runtime)) . '|' . $delay;
+            $challenge = $this->challengeResponseService->getChallenge(
+                $this->getPageExpirationTime($runtime),
+                $delay,
+                $this->getHmacSalt($runtime)
+            );
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
@@ -70,23 +73,9 @@ class Form
             return $value;
         }
 
-        $submittedResponse = base64_decode($requestArguments[self::FIELD_ID] ?? '');
-        if (!str_contains($submittedResponse, '|')) {
-            $this->logger->debug('CR response invalid. Submitted data', $requestArguments);
-            return '';
-        }
-
-        [$expirationTime, $clientData] = explode('|', $submittedResponse);
-        $knownHmac = $this->hashService->hmac($expirationTime, $this->getHmacSalt($runtime));
-        $calculatedData = str_rot13($knownHmac);
-
-        if ($calculatedData !== $clientData) {
-            $this->logger->debug('CR response missmatch. Submitted data', $requestArguments);
-            return '';
-        }
-
-        if ((int)($expirationTime) <= $this->currentTimestamp) {
-            $this->logger->debug('CR response expired. Submitted data', $requestArguments);
+        $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
+        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
+            $this->logger->debug('CR response validation failed', $requestArguments);
             return '';
         }
 

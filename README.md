@@ -66,7 +66,7 @@ lifetime is below the defined value in `minimumPageExpirationTime`.
 In order to log failed requests, it is possible to use a dedicated logfile like shown below:
 
 ```
-$GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['Hooks']['Form']['writerConfiguration'] = [
+$GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['writerConfiguration'] = [
     \TYPO3\CMS\Core\Log\LogLevel::DEBUG => [
         \TYPO3\CMS\Core\Log\Writer\FileWriter::class => [
             'logFile' => \TYPO3\CMS\Core\Core\Environment::getVarPath() . '/log/form-crshield.log',
