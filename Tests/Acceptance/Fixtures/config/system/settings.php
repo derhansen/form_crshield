@@ -41,12 +41,11 @@ return [
             'automaticInstallation' => '1',
             'offlineMode' => '0',
         ],
-        'sf_event_mgt' => [
-            'enableInvoice' => '1',
-            'enableTransfer' => '1',
-            'hideInlineRegistrations' => '0',
-            'hideInlineRegistrationsLimit' => '500',
-            'slugBehaviour' => 'uniqueInSite',
+        'form_crshield' => [
+            'additionalPageExpirationTime' => '3600',
+            'crJavaScriptDelay' => '3',
+            'minimumPageExpirationTime' => '900',
+            'obfuscationMethod' => '1',
         ],
     ],
     'FE' => [

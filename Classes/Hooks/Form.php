@@ -23,6 +23,7 @@ class Form
 
     private int $currentTimestamp;
     private int $cacheTimeOutDefault = 86400;
+    private array $settings;
 
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -30,6 +31,7 @@ class Form
         private readonly ChallengeResponseService $challengeResponseService
     ) {
         $this->currentTimestamp = $this->context->getPropertyFromAspect('date', 'timestamp');
+        $this->settings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
     }
 
     public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args): ?Page
@@ -45,9 +47,9 @@ class Form
 
         if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
             // Set delay for initial form (no delay for re-submission of form)
-            $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
-            $delay = $runtime->getFormSession() === null ? (int)($extensionSettings['crJavaScriptDelay'] ?? 3) : 0;
+            $delay = $runtime->getFormSession() === null ? (int)($this->settings['crJavaScriptDelay'] ?? 3) : 0;
             $challenge = $this->challengeResponseService->getChallenge(
+                (string)($this->settings['obfuscationMethod'] ?? '1'),
                 $this->getPageExpirationTime($runtime),
                 $delay,
                 $this->getHmacSalt($runtime)
@@ -74,7 +76,7 @@ class Form
         }
 
         $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
-        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
+        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime), '1')) {
             $this->logger->debug('CR response validation failed', $requestArguments);
             return '';
         }
@@ -101,9 +103,8 @@ class Form
         }
 
         $timeOutTime = $this->getCacheTimeout($runtime->getRequest());
-        $extensionSettings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
-        if ($timeOutTime < (int)($extensionSettings['minimumPageExpirationTime'] ?? 900)) {
-            $timeOutTime += (int)($extensionSettings['additionalPageExpirationTime'] ?? 3600);
+        if ($timeOutTime < (int)($this->settings['minimumPageExpirationTime'] ?? 900)) {
+            $timeOutTime += (int)($this->settings['additionalPageExpirationTime'] ?? 3600);
         }
 
         return $timeOutTime + $this->currentTimestamp;

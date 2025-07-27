@@ -6,3 +6,5 @@
 	minimumPageExpirationTime = 900
 # cat=settings/enable/30; type=integer; label=Additional time in seconds added to page expiration time, if page expiration time is below calculated minimum page cache expiration time
 	additionalPageExpirationTime = 3600
+# cat=settings/enable/40; type=options[ROT13 (default)=1,Reverse String=2]; label=Obfuscation method
+	obfuscationMethod = 1
