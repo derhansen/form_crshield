@@ -61,9 +61,16 @@ second, the calculated page cache lifetime must have. Default value is `900` sec
 Defines the amount of seconds, which is added to the calculated page cache lifetime, if the calculated page cache
 lifetime is below the defined value in `minimumPageExpirationTime`.
 
+### obfuscationMethod
+
+Defines the obfuscation method used for the challenge/response calculation. Possible values are:
+
+* `1` - ROT13 (default value)
+* `2` - Reverse String
+
 ## Logging
 
-In order to log failed requests, it is possible to use a dedicated logfile like shown below:
+To log failed requests, it is possible to use a dedicated logfile like shown below:
 
 ```
 $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['writerConfiguration'] = [
@@ -75,8 +82,11 @@ $GLOBALS['TYPO3_CONF_VARS']['LOG']['Derhansen']['FormCrshield']['writerConfigura
 ];
 ```
 
-## Usage in 
+## Usage in own extensions
 
+The extension provides the service `ChallengeResponseService` which can be used to retrieve and validate
+the challenge and the expected response. 3rd party extensions can use this service and the included JavaScript
+snippet to implement the challenge/response protection in their own forms (e.g. Extbase forms).
 
 ## Versions
 
