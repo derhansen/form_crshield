@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     if (method === undefined) {
       // If no method is defined, we fall back to the default obfucation method
-      method = '2';
+      method = '1';
     }
 
     setTimeout(() => {element.value = btoa(method + '|' + expiration + '|' + getResult(method, challenge))}, 1e3 * delay)
