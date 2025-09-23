@@ -127,7 +127,6 @@ class Form
             );
     }
 
-
     protected function getHmacSalt(FormRuntime $runtime): string
     {
         $pageRecord = $this->getPageRecord($runtime->getRequest());
