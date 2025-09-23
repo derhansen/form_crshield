@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () =>
     }
 
     if (method === undefined) {
-      // If no method is defined, we fall back to the default obfucation method
+      // If no method is defined, we fall back to the default obfuscation method
       method = '1';
     }
 
