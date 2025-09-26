@@ -25,39 +25,48 @@ class ChallengeResponseService
 
     public function isValidResponse(string $submittedResponse, string $salt): bool
     {
-        $submittedResponse = base64_decode($submittedResponse);
-        if (!str_contains($submittedResponse, '|')) {
+        $decodedResponse = base64_decode($submittedResponse);
+        if (!str_contains($decodedResponse, '|')) {
             $this->logger->debug(
-                'CR response invalid. String does not contain a pipe char. Submitted response',
-                [$submittedResponse]
+                'CR response invalid. String does not contain a pipe char.',
+                ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
             );
             return false;
         }
 
-        if (substr_count($submittedResponse, '|') !== 2) {
+        if (substr_count($decodedResponse, '|') !== 2) {
             $this->logger->debug(
                 'CR response invalid. String does not contain exactly 2 pipe chars. Submitted response',
-                [$submittedResponse]
+                ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
             );
             return false;
         }
 
-        [$method, $expirationTime, $clientData] = explode('|', $submittedResponse);
+        [$method, $expirationTime, $clientData] = explode('|', $decodedResponse);
         $knownHmac = $this->hashService->hmac($expirationTime, $salt);
         $calculatedData = $this->getCalculatedData($knownHmac, $method);
 
         if ($calculatedData !== $clientData) {
-            $this->logger->debug('CR response missmatch. Submitted response', [$submittedResponse]);
+            $this->logger->debug(
+                'CR response missmatch.',
+                ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
+            );
             return false;
         }
 
         $currentTimestamp = $this->context->getPropertyFromAspect('date', 'timestamp');
         if ((int)($expirationTime) <= $currentTimestamp) {
-            $this->logger->debug('CR response expired. Submitted response', [$submittedResponse]);
+            $this->logger->debug(
+                'CR response expired. Submitted response',
+                ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
+            );
             return false;
         }
 
-        $this->logger->debug('CR response successfully validated.', [$submittedResponse]);
+        $this->logger->debug(
+            'CR response successfully validated.',
+            ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
+        );
         return true;
     }
 
