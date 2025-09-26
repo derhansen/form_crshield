@@ -10,13 +10,13 @@ use AcceptanceTester;
  */
 class FormCrshieldCest
 {
-    public function rootPageIsShown(AcceptanceTester $I)
+    public function rootPageIsShown(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
         $I->see('Root Page');
     }
 
-    public function simpleFormCanNotBeSubmittedIfDefaultDelayNotPassed(AcceptanceTester $I)
+    public function simpleFormCanNotBeSubmittedIfDefaultDelayNotPassed(AcceptanceTester $I): void
     {
         $I->amOnPage('simple-form');
         $I->see('Step');
@@ -25,17 +25,17 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function simpleFormCanBeSubmitted(AcceptanceTester $I)
+    public function simpleFormCanBeSubmitted(AcceptanceTester $I): void
     {
         $I->amOnPage('simple-form');
         $I->wait(4);
         $I->see('Step');
         $I->fillField(['id' => 'simpleform-1-text-1'], 'test');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 
-    public function simpleFormWithSummaryCanBeSubmitted(AcceptanceTester $I)
+    public function simpleFormWithSummaryCanBeSubmitted(AcceptanceTester $I): void
     {
         $I->amOnPage('simple-form-with-summary');
         $I->wait(4);
@@ -44,10 +44,10 @@ class FormCrshieldCest
         $I->click('Next step');
         $I->see('Summary step');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 
-    public function multipleStepFormCanBeSubmitted(AcceptanceTester $I)
+    public function multipleStepFormCanBeSubmitted(AcceptanceTester $I): void
     {
         $I->amOnPage('multiple-step-form');
         $I->wait(4);
@@ -55,10 +55,10 @@ class FormCrshieldCest
         $I->fillField(['id' => 'multiplestepform-3-text-1'], 'test');
         $I->click('Next step');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 
-    public function multipleStepFormWithSummaryCanBeSubmitted(AcceptanceTester $I)
+    public function multipleStepFormWithSummaryCanBeSubmitted(AcceptanceTester $I): void
     {
         $I->amOnPage('multiple-step-form-with-summary');
         $I->wait(4);
@@ -69,10 +69,10 @@ class FormCrshieldCest
         $I->click('Next step');
         $I->see('Summary step');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 
-    public function serverSideValidationCanBeSubmittedWithValidValues(AcceptanceTester $I)
+    public function serverSideValidationCanBeSubmittedWithValidValues(AcceptanceTester $I): void
     {
         $I->amOnPage('server-side-validation');
         $I->wait(4);
@@ -80,10 +80,10 @@ class FormCrshieldCest
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 
-    public function serverSideValidationSubmitWithEmptyValuesThenResubmit(AcceptanceTester $I)
+    public function serverSideValidationSubmitWithEmptyValuesThenResubmit(AcceptanceTester $I): void
     {
         $I->amOnPage('server-side-validation');
         $I->wait(4);
@@ -93,6 +93,6 @@ class FormCrshieldCest
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
         $I->click('Submit');
-        $I->see('SUCCESS');
+        $I->waitForText('SUCCESS', 5);
     }
 }
