@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Crypto\HashService;
 
-class ChallengeResponseService
+final class ChallengeResponseService
 {
     public function __construct(
         protected readonly LoggerInterface $logger,
