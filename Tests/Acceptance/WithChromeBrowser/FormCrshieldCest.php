@@ -65,7 +65,7 @@ class FormCrshieldCest
         $I->see('Step');
         $I->fillField(['id' => 'multiplestepformwithsummary-4-text-1'], 'test');
         $I->click('Next step');
-        $I->see('Step');
+        $I->waitForText('Step', 5);
         $I->click('Next step');
         $I->see('Summary step');
         $I->click('Submit');
