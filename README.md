@@ -96,6 +96,12 @@ snippet to implement the challenge/response protection in their own forms (e.g. 
 | 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates    |
 | 1.x     | 10.4 - 12.4 | 7.2 - 8.4 | Features, Bugfixes, Security Updates    |
 
+## Extensions using the challenge/response algorithm
+
+The following extensions use the challenge/response algorithm:
+
+* https://github.com/derhansen/form_crshield
+* https://github.com/derhansen/powermail_crshield
 
 ## Thanks for sponsoring
 
