@@ -1,6 +1,6 @@
 #!/bin/sh
 
-mysqldump --no-data -u$DB_USERNAME -p$DB_PASSWORD_V8 -h127.0.0.1 --port 3406 typo3_formcrshield_acceptance_v13 > typo3.sql
+mysqldump --no-data -u$DB_USERNAME -p$DB_PASSWORD -h127.0.0.1 --port 33066 typo3_formcrshield_acceptance_v13 > typo3.sql
 mysqldump --no-create-info \
           --ignore-table=typo3_formcrshield_acceptance_v13.sys_log \
           --ignore-table=typo3_formcrshield_acceptance_v13.cache_hash \
@@ -15,4 +15,4 @@ mysqldump --no-create-info \
           --ignore-table=typo3_formcrshield_acceptance_v13.cache_rootline_tags \
           --ignore-table=typo3_formcrshield_acceptance_v13.tx_extensionmanager_domain_model_extension \
           --ignore-table=typo3_formcrshield_acceptance_v13.sys_http_report \
-          -u$DB_USERNAME -p$DB_PASSWORD_V8 -h127.0.0.1 --port 3406 typo3_formcrshield_acceptance_v13 >> typo3.sql
+          -u$DB_USERNAME -p$DB_PASSWORD -h127.0.0.1 --port 33066 typo3_formcrshield_acceptance_v13 >> typo3.sql
