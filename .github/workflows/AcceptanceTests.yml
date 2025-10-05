@@ -48,6 +48,7 @@ jobs:
           cd .Build
           echo "Run 'composer install' to activate extension"
           composer install --no-progress
+          ./vendor/bin/typo3 cache:flush
 
       - name: Run PHP webserver
         run: |
