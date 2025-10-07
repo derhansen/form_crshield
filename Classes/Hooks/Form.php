@@ -76,7 +76,7 @@ class Form
         }
 
         $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
-        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime), '1')) {
+        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
             $this->logger->debug('CR response validation failed', $requestArguments);
             return '';
         }
