@@ -10,3 +10,6 @@ services:
   Derhansen\FormCrshield\Hooks\Form:
     public: true
 
+  Derhansen\FormCrshield\Service\ChallengeResponseService:
+    public: true
+
