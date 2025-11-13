@@ -96,6 +96,10 @@ snippet to implement the challenge/response protection in their own forms (e.g. 
 | 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates    |
 | 1.x     | 10.4 - 12.4 | 7.2 - 8.4 | Features, Bugfixes, Security Updates    |
 
+## Reporting a Vulnerability
+
+Please report vulnerabilities to [security@typo3.org](mailto:security@typo3.org).
+
 ## Extensions using the challenge/response algorithm
 
 The following extensions use the challenge/response algorithm:
