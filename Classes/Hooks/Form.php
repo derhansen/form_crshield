@@ -7,6 +7,7 @@ namespace Derhansen\FormCrshield\Hooks;
 use Derhansen\FormCrshield\Service\ChallengeResponseService;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Http\ApplicationType;
@@ -14,6 +15,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Runtime\FormRuntime;
+use TYPO3\CMS\Form\Event\AfterCurrentPageIsResolvedEvent;
+use TYPO3\CMS\Form\Event\BeforeRenderableIsValidatedEvent;
 use TYPO3\CMS\Frontend\Cache\CacheLifetimeCalculator;
 use TYPO3\CMS\Frontend\Page\PageInformation;
 
@@ -22,7 +25,6 @@ class Form
     private const FIELD_ID = 'cr-field';
 
     private int $currentTimestamp;
-    private int $cacheTimeOutDefault = 86400;
     private array $settings;
 
     public function __construct(
@@ -34,25 +36,26 @@ class Form
         $this->settings = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('form_crshield');
     }
 
-    public function afterInitializeCurrentPage(FormRuntime $runtime, ?Page $currentPage, ?Page $page, array $args): ?Page
+    #[AsEventListener('derhansen/form_crshield/form/after-initialize-current-page')]
+    public function afterInitializeCurrentPage(AfterCurrentPageIsResolvedEvent $event): void
     {
         // If the form is in preview mode or we are in backend context, do not add the cr-field
-        if (($runtime->getFormDefinition()->getRenderingOptions()['previewMode'] ?? false) ||
-            ApplicationType::fromRequest($GLOBALS['TYPO3_REQUEST'])->isBackend()
+        if (($event->formRuntime->getFormDefinition()->getRenderingOptions()['previewMode'] ?? false) ||
+            ApplicationType::fromRequest($event->request)->isBackend()
         ) {
-            return $currentPage;
+            return;
         }
 
-        $pageObject = $currentPage ?? $page;
+        $pageObject = $event->currentPage ?? $event->lastDisplayedPage;
 
-        if ($pageObject && !$this->crFieldHasBeenVerified($runtime)) {
+        if ($pageObject && !$this->crFieldHasBeenVerified($event->formRuntime)) {
             // Set delay for initial form (no delay for re-submission of form)
-            $delay = $runtime->getFormSession() === null ? (int)($this->settings['crJavaScriptDelay'] ?? 3) : 0;
+            $delay = $event->formRuntime->getFormSession() === null ? (int)($this->settings['crJavaScriptDelay'] ?? 3) : 0;
             $challenge = $this->challengeResponseService->getChallenge(
                 (string)($this->settings['obfuscationMethod'] ?? '1'),
-                $this->getPageExpirationTime($runtime),
+                $this->getPageExpirationTime($event->formRuntime),
                 $delay,
-                $this->getHmacSalt($runtime)
+                $this->getHmacSalt($event->formRuntime)
             );
 
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
@@ -60,39 +63,36 @@ class Form
             $newElement->setDefaultValue(base64_encode($challenge));
             $newElement->setProperty('fluidAdditionalAttributes', ['autocomplete' => 'off']);
         }
-
-        return $currentPage;
     }
 
-    public function afterSubmit(FormRuntime $runtime, $element, $value, $requestArguments)
+    #[AsEventListener('derhansen/form_crshield/form/after-submit')]
+    public function afterSubmit(BeforeRenderableIsValidatedEvent $event): void
     {
+        $requestArguments = $event->request->getArguments();
+
         // Write all POST data for the current page to debug log
-        if (is_a($element, Page::class)) {
+        if (is_a($event->renderable, Page::class)) {
             $this->logger->debug('Submitted data', $requestArguments);
         }
 
-        if (!(is_a($element, Page::class) || $element->getIdentifier() === self::FIELD_ID)) {
-            return $value;
+        if (!(is_a($event->renderable, Page::class) || $event->renderable->getIdentifier() === self::FIELD_ID)) {
+            return;
         }
 
         $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
-        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
+        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($event->formRuntime))) {
             $this->logger->debug('CR response validation failed', $requestArguments);
-            return '';
+            $event->value = '';
+            return;
         }
 
         // Save sha1 of HmacSalt to formstate for cr-field
-        if ($runtime->getFormState()) {
-            $runtime->getFormState()->setFormValue(self::FIELD_ID, sha1($this->getHmacSalt($runtime)));
-        }
-
-        return $value;
+        $event->formRuntime->getFormState()?->setFormValue(self::FIELD_ID, sha1($this->getHmacSalt($event->formRuntime)));
     }
 
     protected function crFieldHasBeenVerified(FormRuntime $runtime): bool
     {
-        return $runtime->getFormState() &&
-            $runtime->getFormState()->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
+        return $runtime->getFormState()?->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
     }
 
     protected function getPageExpirationTime(FormRuntime $runtime): int
@@ -122,7 +122,6 @@ class Form
                 $pageInformation->getId(),
                 $pageInformation->getPageRecord(),
                 $typoScriptConfigArray,
-                $this->cacheTimeOutDefault,
                 $this->context
             );
     }

@@ -1,8 +1,8 @@
 modules:
   config:
       WebDriver:
-        url: http://form-crshield-acceptance-v13.typo3.local/
+        url: http://form-crshield-acceptance-v14.typo3.local/
       Db:
-        dsn: 'mysql:host=127.0.0.1;dbname=typo3_formcrshield_acceptance_v13;port=33066'
+        dsn: 'mysql:host=127.0.0.1;dbname=typo3_formcrshield_acceptance_v14;port=33066'
         user: '%DB_USERNAME%'
         password: '%DB_PASSWORD%'

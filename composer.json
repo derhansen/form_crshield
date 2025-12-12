@@ -1,7 +1,7 @@
 {
     "name": "derhansen/form_crshield",
     "type": "typo3-cms-extension",
-    "description": "Challenge/response spambot protection for TYPO3 ext:form",
+    "description": "Challenge/response spambot protection for TYPO3 ext:form - Adds a hidden input field containing a challenge string to forms. Client must execute included JavaScript to calculate the expected response.",
     "homepage": "https://github.com/derhansen/form_crshield",
     "support": {
         "issues": "https://github.com/derhansen/form_crshield/issues"
@@ -25,10 +25,10 @@
         "GPL-2.0-or-later"
     ],
     "require": {
-        "typo3/cms-core": "^13.2",
-        "typo3/cms-extbase": "^13.2",
-        "typo3/cms-form": "^13.2",
-        "typo3/cms-frontend": "^13.2"
+        "typo3/cms-core": "^14.0",
+        "typo3/cms-extbase": "^14.0",
+        "typo3/cms-form": "^14.0",
+        "typo3/cms-frontend": "^14.0"
     },
     "replace": {
         "typo3-ter/form-crshield": "self.version"
