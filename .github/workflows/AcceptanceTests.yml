@@ -84,7 +84,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: codeception-results
-          path: Tests/Acceptance/_output/
+          path: |
+            Tests/Acceptance/WithChromeBrowser/_output/
+            Tests/Acceptance/WithPhpBrowser/_output/
 
       - name: Upload logs
         if: ${{ failure() }}
