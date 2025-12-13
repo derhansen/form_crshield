@@ -90,12 +90,12 @@ snippet to implement the challenge/response protection in their own forms (e.g. 
 
 ## Versions
 
-| Version | TYPO3       | PHP       | Support/Development                     |
-|---------|-------------|-----------|---------------------------------------- |
-| 4.x     | 14.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates    |
-| 3.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates    |
-| 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates    |
-| 1.x     | 10.4 - 12.4 | 7.2 - 8.4 | Features, Bugfixes, Security Updates    |
+| Version | TYPO3       | PHP       | Support/Development                  |
+|---------|-------------|-----------|--------------------------------------|
+| 4.x     | 14.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates |
+| 3.x     | 13.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates |
+| 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates |
+| 1.x     | 10.4 - 12.4 | 7.2 - 8.4 | Features, Bugfixes, Security Updates |
 
 ## Reporting a Vulnerability
 
