@@ -21,6 +21,7 @@ class FormCrshieldCest
         $I->amOnPage('simple-form');
         $I->see('Step');
         $I->fillField(['id' => 'simpleform-1-text-1'], 'test');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->dontSee('SUCCESS');
     }
@@ -31,6 +32,7 @@ class FormCrshieldCest
         $I->wait(4);
         $I->see('Step');
         $I->fillField(['id' => 'simpleform-1-text-1'], 'test');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
@@ -43,6 +45,7 @@ class FormCrshieldCest
         $I->fillField(['id' => 'simpleformwithsummary-2-text-1'], 'test');
         $I->click('Next step');
         $I->see('Summary step');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
@@ -54,6 +57,7 @@ class FormCrshieldCest
         $I->see('Step');
         $I->fillField(['id' => 'multiplestepform-3-text-1'], 'test');
         $I->click('Next step');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
@@ -68,6 +72,7 @@ class FormCrshieldCest
         $I->waitForText('Step', 5);
         $I->click('Next step');
         $I->see('Summary step');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
@@ -79,6 +84,7 @@ class FormCrshieldCest
         $I->see('Step');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
@@ -92,6 +98,7 @@ class FormCrshieldCest
         $I->see('This field is mandatory. ');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-0');
         $I->checkOption('#serverSideValidation-6-multicheckbox-1-1');
+        $I->waitForText('Submit', 5);
         $I->click('Submit');
         $I->waitForText('SUCCESS', 5);
     }
