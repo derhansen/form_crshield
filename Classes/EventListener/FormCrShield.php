@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Derhansen\FormCrshield\Hooks;
+namespace Derhansen\FormCrshield\EventListener;
 
 use Derhansen\FormCrshield\Service\ChallengeResponseService;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,7 +20,7 @@ use TYPO3\CMS\Form\Event\BeforeRenderableIsValidatedEvent;
 use TYPO3\CMS\Frontend\Cache\CacheLifetimeCalculator;
 use TYPO3\CMS\Frontend\Page\PageInformation;
 
-class Form
+class FormCrShield
 {
     private const FIELD_ID = 'cr-field';
 
