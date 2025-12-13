@@ -19,8 +19,21 @@ final class ChallengeResponseService
 
     public function getChallenge(string $method, int $expirationTime, int $delay, string $salt): string
     {
-        return $method . '|' . $expirationTime . '|' . $this->hashService->hmac((string)$expirationTime, $salt) . '|' .
+        $challenge = $method . '|' . $expirationTime . '|' . $this->hashService->hmac((string)$expirationTime, $salt) . '|' .
             $delay;
+
+        $this->logger->debug(
+            'Challenge generated using the following parameters: ',
+            [
+                'method' => $method,
+                'expirationTime' => $expirationTime,
+                'delay' => $delay,
+                'salt' => $salt,
+                'challenge' => $challenge
+            ]
+        );
+
+        return $challenge;
     }
 
     public function isValidResponse(string $submittedResponse, string $salt): bool
