@@ -14,8 +14,7 @@ final class ChallengeResponseService
         protected readonly LoggerInterface $logger,
         protected readonly HashService $hashService,
         protected readonly Context $context
-    ) {
-    }
+    ) {}
 
     public function getChallenge(string $method, int $expirationTime, int $delay, string $salt): string
     {
@@ -29,7 +28,7 @@ final class ChallengeResponseService
                 'expirationTime' => $expirationTime,
                 'delay' => $delay,
                 'salt' => $salt,
-                'challenge' => $challenge
+                'challenge' => $challenge,
             ]
         );
 
@@ -85,15 +84,9 @@ final class ChallengeResponseService
 
     private function getCalculatedData(string $knownHmac, string $method): string
     {
-        switch ($method) {
-            case '2':
-                $result = strrev($knownHmac);
-                break;
-            case '1':
-            default:
-                $result = str_rot13($knownHmac);
-        }
-
-        return $result;
+        return match ($method) {
+            '2' => strrev($knownHmac),
+            default => str_rot13($knownHmac),
+        };
     }
 }

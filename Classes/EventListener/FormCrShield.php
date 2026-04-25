@@ -111,7 +111,7 @@ class FormCrShield
     }
 
     /**
-     * Get the cache timeout for the current page (taken 1:1 from TypoScriptFrontendController)
+     * Get the cache timeout for the current page
      */
     protected function getCacheTimeout(ServerRequestInterface $request): int
     {

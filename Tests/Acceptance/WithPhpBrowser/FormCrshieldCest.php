@@ -2,20 +2,18 @@
 
 namespace Tests\Acceptance;
 
-use AcceptanceTester;
-
 /**
  * Test suite executed in php browser which does not support JavaScript.
  */
 class FormCrshieldCest
 {
-    public function rootPageIsShown(AcceptanceTester $I)
+    public function rootPageIsShown(\AcceptanceTester $I)
     {
         $I->amOnPage('/');
         $I->see('Root Page');
     }
 
-    public function simpleFormCanNotBeSubmitted(AcceptanceTester $I)
+    public function simpleFormCanNotBeSubmitted(\AcceptanceTester $I)
     {
         $I->amOnPage('simple-form');
         $I->see('Step');
@@ -24,7 +22,7 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function simpleFormWithSummaryCanNotBeSubmitted(AcceptanceTester $I)
+    public function simpleFormWithSummaryCanNotBeSubmitted(\AcceptanceTester $I)
     {
         $I->amOnPage('simple-form-with-summary');
         $I->see('Step');
@@ -34,7 +32,7 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function multipleStepFormCanNotBeSubmitted(AcceptanceTester $I)
+    public function multipleStepFormCanNotBeSubmitted(\AcceptanceTester $I)
     {
         $I->amOnPage('multiple-step-form');
         $I->see('Step');
@@ -44,7 +42,7 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function multipleStepFormWithSummaryCanNotBeSubmitted(AcceptanceTester $I)
+    public function multipleStepFormWithSummaryCanNotBeSubmitted(\AcceptanceTester $I)
     {
         $I->amOnPage('multiple-step-form-with-summary');
         $I->see('Step');
@@ -57,7 +55,7 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function serverSideValidationCanBeSubmittedWithValidValues(AcceptanceTester $I)
+    public function serverSideValidationCanBeSubmittedWithValidValues(\AcceptanceTester $I)
     {
         $I->amOnPage('server-side-validation');
         $I->see('Step');
@@ -67,7 +65,7 @@ class FormCrshieldCest
         $I->dontSee('SUCCESS');
     }
 
-    public function serverSideValidationSubmitWithEmptyValuesThenResubmit(AcceptanceTester $I)
+    public function serverSideValidationSubmitWithEmptyValuesThenResubmit(\AcceptanceTester $I)
     {
         $I->amOnPage('server-side-validation');
         $I->see('Step');
