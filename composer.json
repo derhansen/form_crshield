@@ -41,7 +41,7 @@
 	"extra": {
 		"typo3/cms": {
 			"extension-key": "form_crshield",
-			"version": "4.0.2",
+			"version": "5.0.0",
 			"Package": {
 				"providesPackages": []
 			}
