@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Derhansen\FormCrshield\EventListener;
 
+use Derhansen\FormCrshield\Middleware\NonceRequestMiddleware;
 use Derhansen\FormCrshield\Service\ChallengeResponseService;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -11,6 +12,7 @@ use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Http\ApplicationType;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
@@ -23,6 +25,7 @@ use TYPO3\CMS\Frontend\Page\PageInformation;
 class FormCrShield
 {
     private const FIELD_ID = 'cr-field';
+    private const FIELD_VERIFIED = 'cr-field-verified';
 
     private int $currentTimestamp;
     private array $settings;
@@ -61,7 +64,10 @@ class FormCrShield
             $newElement = $pageObject->createElement(self::FIELD_ID, 'Hidden');
             $newElement->addValidator(new NotEmptyValidator());
             $newElement->setDefaultValue(base64_encode($challenge));
-            $newElement->setProperty('fluidAdditionalAttributes', ['autocomplete' => 'off']);
+            $newElement->setProperty('fluidAdditionalAttributes', [
+                'autocomplete' => 'off',
+                'data-nonce-url' => $this->getNonceUrl($event->request),
+            ]);
         }
     }
 
@@ -70,29 +76,62 @@ class FormCrShield
     {
         $requestArguments = $event->request->getArguments();
 
-        // Write all POST data for the current page to debug log
+        // The event is dispatched once for the page and once for every element of the page. Only the cr-field
+        // element is relevant. The submitted data is logged once for the page, everything else is skipped.
         if (is_a($event->renderable, Page::class)) {
             $this->logger->debug('Submitted data', $requestArguments);
+            return;
         }
 
-        if (!(is_a($event->renderable, Page::class) || $event->renderable->getIdentifier() === self::FIELD_ID)) {
+        if ($event->renderable->getIdentifier() !== self::FIELD_ID) {
             return;
+        }
+
+        if (!$this->crFieldIsValid($event->formRuntime, $requestArguments)) {
+            $this->logger->debug('CR response validation failed', $requestArguments);
+            $event->value = '';
+        }
+    }
+
+    /**
+     * Validates the cr-field and invalidates the nonce exactly once per form session.
+     *
+     * The nonce is a single-use value. Since the validation event is dispatched multiple times (once for the
+     * page and once for the cr-field element) and forms can be re-rendered within the same session (multi-step
+     * forms, server side validation errors, "go back to previous step"), the response must not be validated -
+     * and the nonce not consumed - more than once. Therefore a successful validation is stored in the (HMAC
+     * protected) form state, which is persisted across requests. Subsequent validations within the same form
+     * session then pass without re-checking the already invalidated nonce, while a replay of the captured
+     * response in a different session still fails (its form state has no marker and the nonce is gone).
+     */
+    protected function crFieldIsValid(FormRuntime $runtime, array $requestArguments): bool
+    {
+        $verifiedMarker = sha1($this->getHmacSalt($runtime));
+        $formState = $runtime->getFormState();
+
+        if ($formState?->getFormValue(self::FIELD_VERIFIED) === $verifiedMarker) {
+            return true;
         }
 
         $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
-        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($event->formRuntime))) {
-            $this->logger->debug('CR response validation failed', $requestArguments);
-            $event->value = '';
-            return;
+        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
+            return false;
         }
 
-        // Save sha1 of HmacSalt to formstate for cr-field
-        $event->formRuntime->getFormState()?->setFormValue(self::FIELD_ID, sha1($this->getHmacSalt($event->formRuntime)));
+        $formState?->setFormValue(self::FIELD_VERIFIED, $verifiedMarker);
+        return true;
     }
 
     protected function crFieldHasBeenVerified(FormRuntime $runtime): bool
     {
-        return $runtime->getFormState()?->getFormValue(self::FIELD_ID) === sha1($this->getHmacSalt($runtime));
+        return $runtime->getFormState()?->getFormValue(self::FIELD_VERIFIED) === sha1($this->getHmacSalt($runtime));
+    }
+
+    protected function getNonceUrl(ServerRequestInterface $request): string
+    {
+        $normalizedParams = $request->getAttribute('normalizedParams');
+        $sitePath = $normalizedParams instanceof NormalizedParams ? $normalizedParams->getSitePath() : '/';
+        return rtrim($sitePath, '/') . NonceRequestMiddleware::ROUTE_PATH;
     }
 
     protected function getPageExpirationTime(FormRuntime $runtime): int

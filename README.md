@@ -22,12 +22,31 @@ failed and no email will be sent.
 In order to make automatic form submissions harder for spambots with active JavaScript, a configurable
 delay for the JavaScript response calculation can be defined in the extension settings (default value: 3 seconds).
 
+### Single-use nonce (replay protection)
+
+In addition to the calculated response, every submission requires a **single-use nonce** ("number used
+once"). The nonce is issued by an uncached endpoint (a PSR-15 middleware listening on the fixed route
+`/form-crshield/nonce`), fetched by the included JavaScript and attached to the challenge/response field. On
+the first successful validation the nonce is invalidated, so a solved challenge can not be replayed for
+multiple (spam) submissions.
+
+The nonce can not be part of the form output itself, because forms are usually rendered from the page cache
+and a cached nonce would be shared by all visitors (and invalidated after the first submission). Fetching a
+fresh, per-client nonce through an uncached endpoint solves this while keeping the form output cacheable.
+
+Nonces are persisted using the TYPO3 caching framework (cache identifier `formcrshield`). The lifetime of a
+nonce is defined server side (extension setting `nonceLifetime`) and can not be influenced by the client.
+Expired nonces are rejected and removed from storage by the caching framework garbage collection. The nonce endpoint is rate limited per
+client IP to prevent abuse. Note that the endpoint is not a spam vector on its own: to get a submission
+accepted, a client still needs a valid page-bound challenge response AND a single-use nonce.
+
 ## Can the protection be bypassed?
 
 Yes, the challenge/response spam shield can be bypassed, if the algorithm used by the extension is implemented
 to a spambot. This is however unlikely, since the spambot either has to use JavaScript (which I believe most
 spambots do not) or has to extract the challenge from the parsed HTML and must calculate and submit the response
-correctly.
+correctly. The single-use nonce additionally prevents a solved challenge from being reused, so a spambot must
+solve the challenge and obtain a fresh nonce for every single submission.
 
 ## Requirements
 
@@ -40,6 +59,43 @@ A modern webbrowser is required to run the JavaScript. Internet Explorer < 11 is
 
 Just install the extension on your TYPO3 website using composer or the TYPO3 extension manager.
 No further configuration is required.
+
+It is recommended to enable the *Caching framework garbage collection* scheduler task to clean up expired
+nonces.
+
+### Nonce cache backend
+
+Nonces are stored in the caching framework cache `formcrshield`. By default it uses the file backend
+(`FileBackend`), so **no database changes are required** to use the extension. Do not use the
+`SimpleFileBackend` for this cache, since it does not support entry lifetimes and nonces would never expire.
+The cache is not assigned to any cache group, so page cache flushes do not invalidate nonces.
+
+This default has a minor drawback: a *flush all caches* (system cache flush) or a deployment that clears the
+file caches (e.g. `typo3temp/var/cache`) will also flush all currently valid nonces. In that case, forms that
+are being filled out at that moment can not be submitted until the page is reloaded (which issues a fresh
+nonce).
+
+If you need nonces to survive system cache flushes and deployments, switch the backend to
+`Typo3DatabaseBackend` in your site configuration (this requires a database schema update so the
+`cache_formcrshield` table is created, e.g. via the *Analyze Database Structure* tool in the Maintenance
+module):
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['formcrshield']['backend']
+    = \TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend::class;
+```
+
+### Nonce endpoint rate limit
+
+The nonce endpoint is rate limited per client IP (default: 60 requests per minute). The limit can be
+adjusted in your site configuration:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['rateLimiter']['form-crshield-nonce'] = [
+    'limit' => 60,
+    'interval' => '1 minute',
+];
+```
 
 ## Extension settings
 
@@ -67,6 +123,13 @@ Defines the obfuscation method used for the challenge/response calculation. Poss
 
 * `1` - ROT13 (default value)
 * `2` - Reverse String
+
+### nonceLifetime
+
+Defines the lifetime in seconds of a single-use nonce issued by the nonce endpoint. The minimum value is `60`
+seconds, the default value is `3600` seconds. A nonce is fetched when the page containing the form is loaded,
+so the lifetime should be long enough to fill out the form. Note that the challenge response itself
+additionally expires with the (HMAC protected) page expiration time.
 
 ## Logging
 
