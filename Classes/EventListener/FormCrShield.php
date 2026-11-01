@@ -76,14 +76,12 @@ class FormCrShield
     {
         $requestArguments = $event->request->getArguments();
 
-        // The event is dispatched once for the page and once for every element of the page. Only the cr-field
-        // element is relevant. The submitted data is logged once for the page, everything else is skipped.
-        if (is_a($event->renderable, Page::class)) {
+        $isPage = is_a($event->renderable, Page::class);
+        if ($isPage) {
             $this->logger->debug('Submitted data', $requestArguments);
-            return;
         }
 
-        if ($event->renderable->getIdentifier() !== self::FIELD_ID) {
+        if (!$isPage && $event->renderable->getIdentifier() !== self::FIELD_ID) {
             return;
         }
 

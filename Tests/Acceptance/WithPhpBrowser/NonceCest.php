@@ -26,6 +26,16 @@ class NonceCest
         $I->see('SUCCESS');
     }
 
+    public function formWithSummaryCanBeSubmittedWithResponseAndNonce(\AcceptanceTester $I): void
+    {
+        $form = 'simpleformwithsummary-2';
+        $response = $this->getResponse($I, $this->fetchNonce($I), '/simple-form-with-summary', $form);
+        $this->submitForm($I, $response, $form);
+        $I->see('Summary step');
+        $I->click('Submit');
+        $I->see('SUCCESS');
+    }
+
     public function replayedResponseAndNonceIsRejected(\AcceptanceTester $I): void
     {
         $response = $this->getResponse($I, $this->fetchNonce($I));
@@ -65,12 +75,12 @@ class NonceCest
     /**
      * Opens the form and calculates the response like FormCrShield.js does
      */
-    private function getResponse(\AcceptanceTester $I, ?string $nonce): string
+    private function getResponse(\AcceptanceTester $I, ?string $nonce, string $page = '/simple-form', string $form = self::FORM): string
     {
-        $I->amOnPage('/simple-form');
+        $I->amOnPage($page);
         $I->see('Step');
 
-        [$method, $expiration, $hmac] = explode('|', base64_decode($I->grabValueFrom('#' . self::FORM . '-cr-field')));
+        [$method, $expiration, $hmac] = explode('|', base64_decode($I->grabValueFrom('#' . $form . '-cr-field')));
         $result = $method === '2' ? strrev($hmac) : str_rot13($hmac);
 
         $parts = [$method, $expiration, $result];
@@ -80,19 +90,19 @@ class NonceCest
         return base64_encode(implode('|', $parts));
     }
 
-    private function submitForm(\AcceptanceTester $I, string $response): void
+    private function submitForm(\AcceptanceTester $I, string $response, string $form = self::FORM): void
     {
         $I->submitForm(
-            '#' . self::FORM,
+            '#' . $form,
             [
                 'tx_form_formframework' => [
-                    self::FORM => [
+                    $form => [
                         'text-1' => 'test',
                         'cr-field' => $response,
                     ],
                 ],
             ],
-            'tx_form_formframework[' . self::FORM . '][__currentPage]'
+            'tx_form_formframework[' . $form . '][__currentPage]'
         );
     }
 }
