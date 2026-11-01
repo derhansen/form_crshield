@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Set up PHP Version
         uses: shivammathur/setup-php@v2
@@ -31,7 +31,7 @@ jobs:
           composer validate
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.composer/cache
           key: dependencies-composer-${{ hashFiles('composer.json') }}
@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload Codeception output
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: codeception-results
           path: |
@@ -90,7 +90,7 @@ jobs:
 
       - name: Upload logs
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: typo3-log
           path: |
