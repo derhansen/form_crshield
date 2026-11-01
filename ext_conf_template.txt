@@ -8,5 +8,5 @@
 	additionalPageExpirationTime = 3600
 # cat=settings/enable/40; type=options[ROT13 (default)=1,Reverse String=2]; label=Obfuscation method
 	obfuscationMethod = 1
-# cat=settings/enable/50; type=integer; label=Lifetime in seconds of a single-use nonce issued by the nonce endpoint (minimum 60)
+# cat=settings/enable/50; type=integer; label=Lifetime in seconds of a single-use nonce and the verification token (minimum 60)
 	nonceLifetime = 3600

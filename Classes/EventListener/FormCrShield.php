@@ -29,6 +29,7 @@ class FormCrShield
 
     private int $currentTimestamp;
     private array $settings;
+    private array $verifiedForms = [];
 
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -91,38 +92,40 @@ class FormCrShield
         }
     }
 
-    /**
-     * Validates the cr-field and invalidates the nonce exactly once per form session.
-     *
-     * The nonce is a single-use value. Since the validation event is dispatched multiple times (once for the
-     * page and once for the cr-field element) and forms can be re-rendered within the same session (multi-step
-     * forms, server side validation errors, "go back to previous step"), the response must not be validated -
-     * and the nonce not consumed - more than once. Therefore a successful validation is stored in the (HMAC
-     * protected) form state, which is persisted across requests. Subsequent validations within the same form
-     * session then pass without re-checking the already invalidated nonce, while a replay of the captured
-     * response in a different session still fails (its form state has no marker and the nonce is gone).
-     */
     protected function crFieldIsValid(FormRuntime $runtime, array $requestArguments): bool
     {
-        $verifiedMarker = sha1($this->getHmacSalt($runtime));
-        $formState = $runtime->getFormState();
-
-        if ($formState?->getFormValue(self::FIELD_VERIFIED) === $verifiedMarker) {
+        if (isset($this->verifiedForms[$runtime->getIdentifier()])) {
             return true;
         }
 
-        $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
-        if (!$this->challengeResponseService->isValidResponse($submittedResponse, $this->getHmacSalt($runtime))) {
-            return false;
+        $salt = $this->getHmacSalt($runtime);
+        $formState = $runtime->getFormState();
+
+        $token = $this->challengeResponseService->rotateVerificationToken($this->getVerificationToken($runtime), $salt);
+        if ($token === null) {
+            $submittedResponse = $requestArguments[self::FIELD_ID] ?? '';
+            if (!$this->challengeResponseService->isValidResponse($submittedResponse, $salt)) {
+                return false;
+            }
+            $token = $this->challengeResponseService->createVerificationToken($salt);
         }
 
-        $formState?->setFormValue(self::FIELD_VERIFIED, $verifiedMarker);
+        $formState?->setFormValue(self::FIELD_VERIFIED, $token);
+        $this->verifiedForms[$runtime->getIdentifier()] = true;
         return true;
     }
 
     protected function crFieldHasBeenVerified(FormRuntime $runtime): bool
     {
-        return $runtime->getFormState()?->getFormValue(self::FIELD_VERIFIED) === sha1($this->getHmacSalt($runtime));
+        return $this->challengeResponseService->isValidVerificationToken(
+            $this->getVerificationToken($runtime),
+            $this->getHmacSalt($runtime)
+        );
+    }
+
+    protected function getVerificationToken(FormRuntime $runtime): string
+    {
+        return (string)($runtime->getFormState()?->getFormValue(self::FIELD_VERIFIED) ?? '');
     }
 
     protected function getNonceUrl(ServerRequestInterface $request): string

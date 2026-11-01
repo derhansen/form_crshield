@@ -9,7 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\RateLimiter\RateLimiterFactory;
@@ -26,14 +25,11 @@ use TYPO3\CMS\Core\RateLimiter\RateLimiterFactory;
 final class NonceRequestMiddleware implements MiddlewareInterface
 {
     public const ROUTE_PATH = '/form-crshield/nonce';
-    private const DEFAULT_NONCE_LIFETIME = 3600;
-    private const MIN_NONCE_LIFETIME = 60;
 
     public function __construct(
         private readonly ChallengeResponseService $challengeResponseService,
         private readonly Context $context,
         private readonly RateLimiterFactory $rateLimiterFactory,
-        private readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -57,18 +53,11 @@ final class NonceRequestMiddleware implements MiddlewareInterface
                 ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         }
 
-        $nonce = $this->challengeResponseService->createNonce($this->getNonceLifetime());
+        $nonce = $this->challengeResponseService->createNonce();
 
         return (new JsonResponse(['nonce' => $nonce]))
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private')
             ->withHeader('Pragma', 'no-cache');
-    }
-
-    private function getNonceLifetime(): int
-    {
-        $settings = $this->extensionConfiguration->get('form_crshield');
-        $lifetime = (int)($settings['nonceLifetime'] ?? self::DEFAULT_NONCE_LIFETIME);
-        return max(self::MIN_NONCE_LIFETIME, $lifetime);
     }
 
     private function getCurrentTimestamp(): int

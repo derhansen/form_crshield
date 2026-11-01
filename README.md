@@ -36,9 +36,41 @@ fresh, per-client nonce through an uncached endpoint solves this while keeping t
 
 Nonces are persisted using the TYPO3 caching framework (cache identifier `formcrshield`). The lifetime of a
 nonce is defined server side (extension setting `nonceLifetime`) and can not be influenced by the client.
-Expired nonces are rejected and removed from storage by the caching framework garbage collection. The nonce endpoint is rate limited per
-client IP to prevent abuse. Note that the endpoint is not a spam vector on its own: to get a submission
-accepted, a client still needs a valid page-bound challenge response AND a single-use nonce.
+Expired nonces are rejected and removed from storage by the caching framework garbage collection. The nonce
+endpoint is rate limited per client IP to prevent abuse. Note that the endpoint is not a spam vector on its
+own: to get a submission accepted, a client still needs a valid page-bound challenge response AND a
+single-use nonce.
+
+### Verification token (multi-step forms and validation errors)
+
+A form can be submitted multiple times within one form session (multi-step forms, summary pages, server side
+validation errors), but the nonce can only be used once. Therefore, after the first successful validation, a
+random **verification token** is created. It is stored server side in the `formcrshield` cache (bound to the
+form) and in the form state (`__state`), which ext:form sends to the client with every rendered page.
+
+Every subsequent request of the form session must contain a valid verification token. The token is
+invalidated on use and replaced by a new one, so only the form state of the most recently rendered page is
+valid. When the form is finished, the new token is never sent to the client. A captured form state can
+therefore not be replayed - in this case the challenge must be solved again using a fresh nonce.
+
+The verification token has the same lifetime as the nonce (extension setting `nonceLifetime`).
+
+### Replay protection in versions < 5
+
+Versions < 5 of the extension (3.x for TYPO3 13 and 4.x for TYPO3 14) do not use a nonce and allow replays
+by design:
+
+* The challenge is bound to the page and is part of the (cached) form output, so it is the same for all
+  visitors. A solved response can be reused for any number of submissions until the challenge expires.
+* After a successful validation, a static marker is saved to the form state. ext:form protects the form
+  state (`__state`) with an HMAC, but does not bind it to a session and does not let it expire. A captured
+  form state containing the marker can be replayed for any number of submissions, even with an empty
+  challenge/response field.
+
+This is an accepted risk for these versions, since forms are usually rendered from the TYPO3 page cache and
+no per-client state can be part of the form output. The protection targets spambots which do not execute
+JavaScript and do not implement the algorithm of the extension. Version 5 adds the uncached nonce endpoint
+and the rotating verification token to close both replay vectors.
 
 ## Can the protection be bypassed?
 
@@ -126,10 +158,11 @@ Defines the obfuscation method used for the challenge/response calculation. Poss
 
 ### nonceLifetime
 
-Defines the lifetime in seconds of a single-use nonce issued by the nonce endpoint. The minimum value is `60`
-seconds, the default value is `3600` seconds. A nonce is fetched when the page containing the form is loaded,
-so the lifetime should be long enough to fill out the form. Note that the challenge response itself
-additionally expires with the (HMAC protected) page expiration time.
+Defines the lifetime in seconds of a single-use nonce and of the verification token. The minimum value is
+`60` seconds, the default value is `3600` seconds. A nonce is fetched when the page containing the form is
+loaded, so the lifetime should be long enough to fill out the form. If a form session takes longer than the
+lifetime, the challenge must be solved again. Note that the challenge response itself additionally expires
+with the (HMAC protected) page expiration time.
 
 ## Logging
 
@@ -155,6 +188,7 @@ snippet to implement the challenge/response protection in their own forms (e.g. 
 
 | Version | TYPO3       | PHP       | Support/Development                  |
 |---------|-------------|-----------|--------------------------------------|
+| 5.x     | 14.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates |
 | 4.x     | 14.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates |
 | 3.x     | 13.x        | 8.2 - 8.5 | Features, Bugfixes, Security Updates |
 | 2.x     | 13.x        | 8.2 - 8.4 | Features, Bugfixes, Security Updates |

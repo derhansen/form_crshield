@@ -47,6 +47,37 @@ class NonceCest
         $I->dontSee('SUCCESS');
     }
 
+    public function replayedFormStateIsRejected(\AcceptanceTester $I): void
+    {
+        $response = $this->getResponse($I, $this->fetchNonce($I));
+        $this->submitForm($I, $response, self::FORM, '');
+        $I->see('This field is mandatory.');
+        $fields = $this->grabStateFields($I, self::FORM);
+
+        $this->submitForm($I, $response);
+        $I->see('SUCCESS');
+
+        $I->amOnPage('/simple-form');
+        $this->submitFormWithFields($I, self::FORM, $fields + ['text-1' => 'test', 'cr-field' => '', '__currentPage' => '1']);
+        $I->dontSee('SUCCESS');
+    }
+
+    public function replayedFormStateOfMultipleStepFormIsRejected(\AcceptanceTester $I): void
+    {
+        $form = 'multiplestepform-3';
+        $response = $this->getResponse($I, $this->fetchNonce($I), '/multiple-step-form', $form);
+        $this->submitForm($I, $response, $form);
+        $I->see('Submit');
+        $fields = $this->grabStateFields($I, $form);
+
+        $I->click('Submit');
+        $I->see('SUCCESS');
+
+        $I->amOnPage('/multiple-step-form');
+        $this->submitFormWithFields($I, $form, $fields + ['text-2' => 'test', 'cr-field' => '', '__currentPage' => '2']);
+        $I->dontSee('SUCCESS');
+    }
+
     public function responseWithoutNonceIsRejected(\AcceptanceTester $I): void
     {
         $response = $this->getResponse($I, null);
@@ -90,19 +121,33 @@ class NonceCest
         return base64_encode(implode('|', $parts));
     }
 
-    private function submitForm(\AcceptanceTester $I, string $response, string $form = self::FORM): void
+    private function submitForm(\AcceptanceTester $I, string $response, string $form = self::FORM, string $text = 'test'): void
     {
         $I->submitForm(
             '#' . $form,
             [
                 'tx_form_formframework' => [
                     $form => [
-                        'text-1' => 'test',
+                        'text-1' => $text,
                         'cr-field' => $response,
                     ],
                 ],
             ],
             'tx_form_formframework[' . $form . '][__currentPage]'
         );
+    }
+
+    private function submitFormWithFields(\AcceptanceTester $I, string $form, array $fields): void
+    {
+        $I->submitForm('#' . $form, ['tx_form_formframework' => [$form => $fields]]);
+    }
+
+    private function grabStateFields(\AcceptanceTester $I, string $form): array
+    {
+        $fields = [];
+        foreach (['__state', '__session'] as $field) {
+            $fields[$field] = $I->grabValueFrom('input[name="tx_form_formframework[' . $form . '][' . $field . ']"]');
+        }
+        return $fields;
     }
 }

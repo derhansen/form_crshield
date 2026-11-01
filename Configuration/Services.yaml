@@ -6,3 +6,8 @@ services:
 
   Derhansen\FormCrshield\:
     resource: '../Classes/*'
+
+  cache.formcrshield:
+    class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+    factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
+    arguments: ['formcrshield']

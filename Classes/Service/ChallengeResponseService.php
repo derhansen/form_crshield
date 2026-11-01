@@ -5,35 +5,67 @@ declare(strict_types=1);
 namespace Derhansen\FormCrshield\Service;
 
 use Psr\Log\LoggerInterface;
-use TYPO3\CMS\Core\Cache\CacheManager;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Crypto\HashService;
 use TYPO3\CMS\Core\Crypto\Random;
 
 final class ChallengeResponseService
 {
-    protected readonly FrontendInterface $nonceCache;
+    private const DEFAULT_LIFETIME = 3600;
+    private const MIN_LIFETIME = 60;
+    private const TOKEN_PREFIX = 'v_';
 
     public function __construct(
         protected readonly LoggerInterface $logger,
         protected readonly HashService $hashService,
         protected readonly Context $context,
-        protected readonly CacheManager $cacheManager,
-        protected readonly Random $random
-    ) {
-        // The "cache.formcrshield" in instantiated manually here to provide backwards compatibility of the class
-        $this->nonceCache = $cacheManager->getCache('formcrshield');
-    }
+        protected readonly Random $random,
+        protected readonly ExtensionConfiguration $extensionConfiguration,
+        #[Autowire(service: 'cache.formcrshield')]
+        protected readonly FrontendInterface $nonceCache
+    ) {}
 
-    public function createNonce(int $lifetime): string
+    public function createNonce(): string
     {
         $nonce = $this->random->generateRandomHexString(64);
-        $this->nonceCache->set($nonce, '', [], $lifetime);
+        $this->nonceCache->set($nonce, '', [], $this->getLifetime());
 
-        $this->logger->debug('Nonce created', ['nonce' => $nonce, 'lifetime' => $lifetime]);
+        $this->logger->debug('Nonce created', ['nonce' => $nonce]);
 
         return $nonce;
+    }
+
+    public function createVerificationToken(string $salt): string
+    {
+        $token = $this->random->generateRandomHexString(64);
+        $this->nonceCache->set(self::TOKEN_PREFIX . $token, sha1($salt), [], $this->getLifetime());
+
+        $this->logger->debug('Verification token created', ['token' => $token]);
+
+        return $token;
+    }
+
+    public function isValidVerificationToken(string $token, string $salt): bool
+    {
+        return $this->isValidHexString($token) && $this->nonceCache->get(self::TOKEN_PREFIX . $token) === sha1($salt);
+    }
+
+    /**
+     * Invalidates the given token and returns a new one, or null if the given token is invalid
+     */
+    public function rotateVerificationToken(string $token, string $salt): ?string
+    {
+        if (!$this->isValidVerificationToken($token, $salt)) {
+            return null;
+        }
+
+        $this->nonceCache->remove(self::TOKEN_PREFIX . $token);
+        $this->logger->debug('Verification token consumed', ['token' => $token]);
+
+        return $this->createVerificationToken($salt);
     }
 
     public function getChallenge(string $method, int $expirationTime, int $delay, string $salt): string
@@ -87,7 +119,7 @@ final class ChallengeResponseService
             return false;
         }
 
-        if (!$this->nonceCache->has($nonce)) {
+        if (!$this->isValidHexString($nonce) || !$this->nonceCache->has($nonce)) {
             $this->logger->debug(
                 'CR response nonce invalid, expired or already used.',
                 ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
@@ -95,7 +127,6 @@ final class ChallengeResponseService
             return false;
         }
 
-        // Invalidate the nonce, so it can not be reused for a subsequent (spam) submission
         $this->nonceCache->remove($nonce);
         $this->logger->debug('Nonce consumed', ['nonce' => $nonce]);
 
@@ -104,6 +135,17 @@ final class ChallengeResponseService
             ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
         );
         return true;
+    }
+
+    private function getLifetime(): int
+    {
+        $settings = $this->extensionConfiguration->get('form_crshield');
+        return max(self::MIN_LIFETIME, (int)($settings['nonceLifetime'] ?? self::DEFAULT_LIFETIME));
+    }
+
+    private function isValidHexString(string $value): bool
+    {
+        return preg_match('/^[a-f0-9]{64}$/', $value) === 1;
     }
 
     private function getCalculatedData(string $knownHmac, string $method): string
