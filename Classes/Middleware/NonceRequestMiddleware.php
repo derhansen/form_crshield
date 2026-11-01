@@ -39,6 +39,11 @@ final class NonceRequestMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        if (!$this->isAllowedFetchMetadata($request)) {
+            return (new JsonResponse(['error' => 'Forbidden'], 403))
+                ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        }
+
         $limiter = $this->rateLimiterFactory->createRequestBasedLimiter($request, [
             'id' => 'form-crshield-nonce',
             'policy' => 'sliding_window',
@@ -58,6 +63,12 @@ final class NonceRequestMiddleware implements MiddlewareInterface
         return (new JsonResponse(['nonce' => $nonce]))
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private')
             ->withHeader('Pragma', 'no-cache');
+    }
+
+    private function isAllowedFetchMetadata(ServerRequestInterface $request): bool
+    {
+        return $request->getHeaderLine('Sec-Fetch-Site') !== 'cross-site'
+            && $request->getHeaderLine('Sec-Fetch-Mode') !== 'navigate';
     }
 
     private function getCurrentTimestamp(): int

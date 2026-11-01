@@ -19,6 +19,30 @@ class NonceCest
         Assert::assertStringContainsString('no-store', implode(',', $I->grabResponseHeaders('Cache-Control')));
     }
 
+    public function nonceEndpointRejectsCrossSiteRequest(\AcceptanceTester $I): void
+    {
+        $I->haveHttpHeader('Sec-Fetch-Site', 'cross-site');
+        $I->amOnPage('/form-crshield/nonce');
+        $I->seeResponseCodeIs(403);
+    }
+
+    public function nonceEndpointRejectsNavigationRequest(\AcceptanceTester $I): void
+    {
+        $I->haveHttpHeader('Sec-Fetch-Site', 'none');
+        $I->haveHttpHeader('Sec-Fetch-Mode', 'navigate');
+        $I->amOnPage('/form-crshield/nonce');
+        $I->seeResponseCodeIs(403);
+    }
+
+    public function nonceEndpointAcceptsSameOriginFetchRequest(\AcceptanceTester $I): void
+    {
+        $I->haveHttpHeader('Sec-Fetch-Site', 'same-origin');
+        $I->haveHttpHeader('Sec-Fetch-Mode', 'cors');
+        $I->amOnPage('/form-crshield/nonce');
+        $I->seeResponseCodeIs(200);
+        Assert::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $this->grabNonce($I));
+    }
+
     public function formCanBeSubmittedWithResponseAndNonce(\AcceptanceTester $I): void
     {
         $response = $this->getResponse($I, $this->fetchNonce($I));
