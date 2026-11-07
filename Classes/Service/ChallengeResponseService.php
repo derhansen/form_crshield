@@ -62,7 +62,9 @@ final class ChallengeResponseService
             return null;
         }
 
-        $this->nonceCache->remove(self::TOKEN_PREFIX . $token);
+        if (!$this->nonceCache->remove(self::TOKEN_PREFIX . $token)) {
+            return null;
+        }
         $this->logger->debug('Verification token consumed', ['token' => $token]);
 
         return $this->createVerificationToken($salt);
@@ -119,7 +121,10 @@ final class ChallengeResponseService
             return false;
         }
 
-        if (!$this->isValidHexString($nonce) || !$this->nonceCache->has($nonce)) {
+        if (!$this->isValidHexString($nonce)
+            || !$this->nonceCache->has($nonce)
+            || !$this->nonceCache->remove($nonce)
+        ) {
             $this->logger->debug(
                 'CR response nonce invalid, expired or already used.',
                 ['Submitted response: ' => $submittedResponse, 'Decoded response: ' => $decodedResponse]
@@ -127,7 +132,6 @@ final class ChallengeResponseService
             return false;
         }
 
-        $this->nonceCache->remove($nonce);
         $this->logger->debug('Nonce consumed', ['nonce' => $nonce]);
 
         $this->logger->debug(
